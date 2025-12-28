@@ -1,0 +1,74 @@
+@model IEnumerable<GameLoggd.Models.Domain.UserList>
+
+@{
+    ViewData["Title"] = "My Lists";
+}
+
+<div class="page-container" style="padding-top: 2rem;">
+    <div class="section-header">
+        <h1>My Lists</h1>
+        <a asp-action="Create" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New List
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="lists-grid">
+            @foreach (var list in Model)
+            {
+                <a asp-action="Details" asp-route-id="@list.Id" style="text-decoration: none;">
+                    <div class="list-card">
+                        <!-- Preview Images (Collage style) -->
+                        <div class="list-thumbnail">
+                            @if (list.Items.Any())
+                            {
+                                <div class="thumbnail-grid">
+                                    @foreach (var item in list.Items.Take(4))
+                                    {
+                                        <img src="@(string.IsNullOrEmpty(item.Game?.ImagePath) ? "/images/placeholder_game.jpg" : item.Game.ImagePath)" />
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="list-overlay" style="opacity: 1; background: var(--bg-card);">
+                                    <div class="list-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="list-info">
+                            <h3>@list.Title</h3>
+                            <div class="list-meta">
+                                <span>@list.Items.Count games</span>
+                                <span>Updated @list.UpdatedAt.ToString("MMM dd")</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 6rem 1rem; color: var(--text-secondary);">
+            <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #666;">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+                </svg>
+            </div>
+            <h2 style="color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">No lists yet</h2>
+            <p style="margin-bottom: 2rem;">Create collections to organize your games.</p>
+            <a asp-action="Create" class="btn-primary">Create your first list</a>
+        </div>
+    }
+</div>

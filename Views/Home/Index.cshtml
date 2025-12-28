@@ -1,0 +1,155 @@
+@model GameLoggd.Models.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    @if (Model.HeroGame != null)
+    {
+        <div class="hero-background">
+            @if (!string.IsNullOrEmpty(Model.HeroGame.ImagePath))
+            {
+                <img src="@Model.HeroGame.ImagePath" alt="@Model.HeroGame.Title" class="hero-image" />
+            }
+            else
+            {
+                 <div class="hero-image" style="background: linear-gradient(45deg, #1a1a1a, #2a2a2a);"></div>
+            }
+            <div class="hero-overlay"></div>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="trending-badge">
+                    <span>Latest Addition</span>
+                </div>
+                <h2>@Model.HeroGame.Title</h2>
+                <p>
+                    @(string.IsNullOrWhiteSpace(Model.HeroGame.Description) 
+                        ? "No description available." 
+                        : (Model.HeroGame.Description.Length > 150 
+                            ? Model.HeroGame.Description.Substring(0, 150) + "..." 
+                            : Model.HeroGame.Description))
+                </p>
+                <a href="/game/@Model.HeroGame.Slug" class="btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Log this game
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h2>Welcome to GameLoggd</h2>
+                <p>Start your collection by adding games in the admin panel.</p>
+            </div>
+        </div>
+    }
+</section>
+
+<!-- Popular Games -->
+<section class="popular-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h2>Recent Games</h2>
+            <!-- Scroll controls could be added here if JS implemented -->
+        </div>
+
+        <div class="games-scroll">
+            @if (Model.PopularGames.Any())
+            {
+                foreach (var game in Model.PopularGames)
+                {
+                    <a class="game-card" href="/game/@game.Slug">
+                        <div class="game-cover">
+                             @if (!string.IsNullOrEmpty(game.ImagePath))
+                            {
+                                <img src="@game.ImagePath" alt="@game.Title" />
+                            }
+                            else
+                            {
+                                <div style="width:100%; height:100%; background: #333; display:flex; align-items:center; justify-content:center; color:#777;">
+                                    No Image
+                                </div>
+                            }
+                            <div class="game-overlay">
+                                <!-- Optional rating overlay -->
+                            </div>
+                        </div>
+                        <h3>@game.Title</h3>
+                    </a>
+                }
+            }
+            else
+            {
+                <p style="color: #888; padding: 2rem;">No games found.</p>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="reviews-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h2>Activity Feed</h2>
+        </div>
+
+        <div class="reviews-list">
+            @foreach (var activity in Model.Activities)
+            {
+                <div class="review-card">
+                    <div class="review-avatar avatar-cyan">
+                        @(activity.User?.UserName?.Substring(0,1).ToUpper() ?? "?")
+                    </div>
+                    <div class="review-content">
+                        @if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Review)
+                        {
+                            <div class="review-header">
+                                <span class="reviewer-name">@activity.User?.UserName</span>
+                                <span class="review-text-light">reviewed</span>
+                                <a class="game-link" href="/game/@activity.Game?.Slug">@activity.Game?.Title</a>
+                            </div>
+                            <div class="review-stars">
+                                @for(int i=0; i<activity.Review?.Rating; i++) { <span class="star filled">★</span> }
+                            </div>
+                            <p class="review-text">@activity.Review?.Content</p>
+                        }
+                        else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Log)
+                        {
+                            <div class="review-header">
+                                <span class="reviewer-name">@activity.User?.UserName</span>
+                                <span class="review-text-light">logged</span>
+                                <a class="game-link" href="/game/@activity.Game?.Slug">@activity.Game?.Title</a>
+                                <span class="review-text-light">as</span>
+                                <span style="color: var(--neon-cyan); font-weight: bold;">@activity.Log?.Status</span>
+                            </div>
+                            <p class="review-text" style="font-style: italic; color: #666; font-size: 0.85rem;">@activity.Date.ToString("MMM dd, HH:mm")</p>
+                        }
+                        else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.ListCreated)
+                        {
+                            <div class="review-header">
+                                <span class="reviewer-name">@activity.User?.UserName</span>
+                                <span class="review-text-light">created a list</span>
+                                <a class="game-link" href="/list/@activity.List?.Id">@activity.List?.Title</a>
+                            </div>
+                            <p class="review-text">@activity.List?.Description</p>
+                        }
+                    </div>
+                </div>
+            }
+            @if(!Model.Activities.Any())
+            {
+                 <p style="color: #666; text-align: center; padding: 2rem;">No recent activity.</p>
+            }
+        </div>
+    </div>
+</section>

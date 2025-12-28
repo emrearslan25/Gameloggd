@@ -1,0 +1,459 @@
+@model GameLoggd.Models.Admin.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin";
+    var status = TempData["StatusMessage"] as string;
+    var statusType = (TempData["StatusType"] as string) ?? "info"; // success, danger, warning, info
+}
+
+<section class="popular-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h2>Admin Panel</h2>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(status))
+        {
+            <div class="admin-banner admin-banner-@statusType">@status</div>
+        }
+
+        <!-- STATS ROW -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <div style="background: rgba(0, 240, 255, 0.1); color: var(--neon-cyan); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold;">@Model.TotalUsers</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Users</div>
+                </div>
+            </div>
+            
+             <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <div style="background: rgba(255, 48, 79, 0.1); color: #ff304f; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold;">@Model.TotalReviews</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Reviews</div>
+                </div>
+            </div>
+
+             <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <div style="background: rgba(255, 255, 255, 0.1); color: #fff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold;">@Model.TotalGames</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Games</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <div class="admin-card">
+                <h3>Games</h3>
+                <p class="admin-muted">Add or remove games.</p>
+
+                @if (Model.EditingGame is not null)
+                {
+                    <div class="admin-edit-title">Editing: <span>@Model.EditingGame.Title</span></div>
+                    <form method="post" action="/admin/games/update" class="admin-form" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.EditingGame.Id" />
+
+                        <div class="admin-form-row">
+                            <div class="admin-field">
+                                <label for="eg_title">Title</label>
+                                <input id="eg_title" name="title" value="@Model.EditingGame.Title" />
+                            </div>
+                            <div class="admin-field">
+                                <label for="eg_year">Year</label>
+                                <input id="eg_year" name="year" inputmode="numeric" value="@(Model.EditingGame.Year?.ToString() ?? string.Empty)" />
+                            </div>
+                        </div>
+
+                        <div class="admin-field">
+                            <label for="eg_dev">Developer</label>
+                            <input id="eg_dev" name="developer" value="@Model.EditingGame.Developer" />
+                        </div>
+
+                        <div class="admin-field">
+                            <label for="eg_desc">Description</label>
+                            <textarea id="eg_desc" name="description" rows="4" placeholder="Short description">@Model.EditingGame.Description</textarea>
+                        </div>
+
+                        <div class="admin-data-row">
+                            <!-- EDIT GENRES -->
+                            <div class="admin-field">
+                                <label>Genres</label>
+                                <div class="tag-input-container">
+                                    <div class="tags-list" id="edit-genre-tags">
+                                        @foreach(var g in Model.EditingGame.Genres)
+                                        {
+                                            <div class="admin-tag" data-id="@g.Id">
+                                                @g.Name
+                                                <span class="remove-tag" onclick="removeTag(this, 'edit-genre', '@g.Id')">×</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="tag-controls">
+                                        <select id="edit-genre-select" class="admin-select-sm">
+                                            <option value="">Select Genre...</option>
+                                            @foreach (var g in Model.AvailableGenres)
+                                            {
+                                                <option value="@g.Id">@g.Name</option>
+                                            }
+                                        </select>
+                                        <button type="button" class="admin-btn-small" onclick="addTag('edit-genre', 'genreIds')">Add</button>
+                                    </div>
+                                </div>
+                                <div id="edit-genre-inputs">
+                                     @foreach(var g in Model.EditingGame.Genres)
+                                     {
+                                         <input type="hidden" name="genreIds" value="@g.Id" id="input-edit-genre-@g.Id" />
+                                     }
+                                </div>
+                            </div>
+
+                            <!-- EDIT PLATFORMS -->
+                            <div class="admin-field">
+                                <label>Platforms</label>
+                                <div class="tag-input-container">
+                                    <div class="tags-list" id="edit-platform-tags">
+                                        @foreach(var p in Model.EditingGame.Platforms)
+                                        {
+                                            <div class="admin-tag" data-id="@p.Id">
+                                                @p.Name
+                                                <span class="remove-tag" onclick="removeTag(this, 'edit-platform', '@p.Id')">×</span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="tag-controls">
+                                        <select id="edit-platform-select" class="admin-select-sm">
+                                            <option value="">Select Platform...</option>
+                                            @foreach (var p in Model.AvailablePlatforms)
+                                            {
+                                                <option value="@p.Id">@p.Name</option>
+                                            }
+                                        </select>
+                                        <button type="button" class="admin-btn-small" onclick="addTag('edit-platform', 'platformIds')">Add</button>
+                                    </div>
+                                </div>
+                                <div id="edit-platform-inputs">
+                                    @foreach(var p in Model.EditingGame.Platforms)
+                                    {
+                                        <input type="hidden" name="platformIds" value="@p.Id" id="input-edit-platform-@p.Id" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="admin-field">
+                            <label for="eg_img">Image (optional)</label>
+                            <input id="eg_img" name="image" type="file" accept="image/*" />
+                            @if (!string.IsNullOrWhiteSpace(Model.EditingGame.ImagePath))
+                            {
+                                <div class="admin-thumb-row">
+                                    <img class="admin-thumb" src="@Model.EditingGame.ImagePath" alt="Game image" />
+                                    <div class="admin-thumb-meta">Current image</div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="admin-actions">
+                            <button class="admin-btn-primary" type="submit">Save changes</button>
+                            <a class="admin-btn" href="/admin">Cancel</a>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <form method="post" action="/admin/games/add" class="admin-form" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="admin-form-row">
+                        <div class="admin-field">
+                            <label for="g_title">Title</label>
+                            <input id="g_title" name="title" placeholder="Cyberpunk Legends..." />
+                        </div>
+                        <div class="admin-field">
+                            <label for="g_year">Year</label>
+                            <input id="g_year" name="year" inputmode="numeric" placeholder="2024" />
+                        </div>
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="g_dev">Developer</label>
+                        <input id="g_dev" name="developer" placeholder="Neon Studios" />
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="g_desc">Description</label>
+                        <textarea id="g_desc" name="description" rows="4" placeholder="Short description"></textarea>
+                    </div>
+
+                    <div class="admin-data-row">
+                        <!-- GENRES TAG INPUT -->
+                        <div class="admin-field">
+                            <label>Genres</label>
+                            <div class="tag-input-container" id="add-genre-container">
+                                <div class="tags-list" id="add-genre-tags"></div>
+                                <div class="tag-controls">
+                                    <select id="add-genre-select" class="admin-select-sm">
+                                        <option value="">Select Genre...</option>
+                                        @foreach (var g in Model.AvailableGenres)
+                                        {
+                                            <option value="@g.Id">@g.Name</option>
+                                        }
+                                    </select>
+                                    <button type="button" class="admin-btn-small" onclick="addTag('add-genre', 'genreIds')">Add</button>
+                                </div>
+                            </div>
+                            <!-- Hidden inputs container -->
+                            <div id="add-genre-inputs"></div>
+                        </div>
+
+                        <!-- PLATFORMS TAG INPUT -->
+                        <div class="admin-field">
+                            <label>Platforms</label>
+                            <div class="tag-input-container" id="add-platform-container">
+                                <div class="tags-list" id="add-platform-tags"></div>
+                                <div class="tag-controls">
+                                    <select id="add-platform-select" class="admin-select-sm">
+                                        <option value="">Select Platform...</option>
+                                        @foreach (var p in Model.AvailablePlatforms)
+                                        {
+                                            <option value="@p.Id">@p.Name</option>
+                                        }
+                                    </select>
+                                    <button type="button" class="admin-btn-small" onclick="addTag('add-platform', 'platformIds')">Add</button>
+                                </div>
+                            </div>
+                             <!-- Hidden inputs container -->
+                            <div id="add-platform-inputs"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="g_img">Image (optional)</label>
+                        <input id="g_img" name="image" type="file" accept="image/*" />
+                    </div>
+
+                    <button class="admin-btn-primary" type="submit">Add game</button>
+                </form>
+                }
+
+                <div class="admin-list">
+                    @foreach (var game in Model.Games)
+                    {
+                        <div class="admin-item">
+                            <a class="admin-item-main admin-click" href="/admin?editGameId=@game.Id">
+                                <div class="admin-item-left">
+                                    @if (!string.IsNullOrWhiteSpace(game.ImagePath))
+                                    {
+                                        <img class="admin-thumb-sm" src="@game.ImagePath" alt="" />
+                                    }
+                                    else
+                                    {
+                                        <div class="admin-thumb-sm admin-thumb-sm-empty"></div>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="admin-item-title">@game.Title</div>
+                                    <div class="admin-item-meta">
+                                        <span>@(game.Year?.ToString() ?? "—")</span>
+                                        <span class="admin-dot">•</span>
+                                        <span>@(string.IsNullOrWhiteSpace(game.Developer) ? "—" : game.Developer)</span>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <form method="post" action="/admin/games/delete">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@game.Id" />
+                                <button class="admin-btn" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+                
+                @* Games Pagination *@
+                <div class="admin-pagination">
+                    @if (Model.Games.HasPreviousPage)
+                    {
+                        <a href="/admin?gamePage=@(Model.Games.PageIndex - 1)&userPage=@Model.Users.PageIndex" class="admin-btn-small">Previous</a>
+                    }
+                    else
+                    {
+                        <span class="admin-btn-small disabled">Previous</span>
+                    }
+                        
+                    <span class="admin-page-info">Page @Model.Games.PageIndex of @Model.Games.TotalPages</span>
+
+                    @if (Model.Games.HasNextPage)
+                    {
+                        <a href="/admin?gamePage=@(Model.Games.PageIndex + 1)&userPage=@Model.Users.PageIndex" class="admin-btn-small">Next</a>
+                    }
+                     else
+                    {
+                        <span class="admin-btn-small disabled">Next</span>
+                    }
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h3>Users</h3>
+                <p class="admin-muted">List users and ban/unban.</p>
+
+                <div class="admin-list">
+                    @foreach (var user in Model.Users)
+                    {
+                        <div class="admin-item">
+                            <div class="admin-item-main">
+                                <div class="admin-item-title">@(string.IsNullOrWhiteSpace(user.UserName) ? "(no username)" : user.UserName)</div>
+                                <div class="admin-item-meta">
+                                    <span>@(string.IsNullOrWhiteSpace(user.Email) ? "—" : user.Email)</span>
+                                    <span class="admin-dot">•</span>
+                                    <span class="@(user.IsBanned ? "admin-pill admin-pill-danger" : "admin-pill")">
+                                        @(user.IsBanned ? "Banned" : "Active")
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (user.IsBanned)
+                            {
+                                <form method="post" action="/admin/users/unban">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    <button class="admin-btn" type="submit">Unban</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" action="/admin/users/ban">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    <button class="admin-btn" type="submit">Ban</button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Users Pagination *@
+                <div class="admin-pagination">
+                    @if (Model.Users.HasPreviousPage)
+                    {
+                        <a href="/admin?userPage=@(Model.Users.PageIndex - 1)&gamePage=@Model.Games.PageIndex" class="admin-btn-small">Previous</a>
+                    }
+                     else
+                    {
+                        <span class="admin-btn-small disabled">Previous</span>
+                    }
+
+                    <span class="admin-page-info">Page @Model.Users.PageIndex of @Model.Users.TotalPages</span>
+
+                    @if (Model.Users.HasNextPage)
+                    {
+                        <a href="/admin?userPage=@(Model.Users.PageIndex + 1)&gamePage=@Model.Games.PageIndex" class="admin-btn-small">Next</a>
+                    }
+                     else
+                    {
+                        <span class="admin-btn-small disabled">Next</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function addTag(prefix, inputName) {
+        var select = document.getElementById(prefix + '-select');
+        var value = select.value;
+        var text = select.options[select.selectedIndex].text;
+
+        if (!value) return;
+
+        // Check if already exists in list
+        var inputsContainer = document.getElementById(prefix + '-inputs');
+        if (inputsContainer.querySelector('input[value="' + value + '"]')) {
+            alert('Already added!');
+            return;
+        }
+
+        // Add visual tag
+        var tagsList = document.getElementById(prefix + '-tags');
+        var tag = document.createElement('div');
+        tag.className = 'admin-tag';
+        tag.setAttribute('data-id', value);
+        tag.innerHTML = text + ' <span class="remove-tag" onclick="removeTag(this, \'' + prefix + '\', \'' + value + '\')">×</span>';
+        tagsList.appendChild(tag);
+
+        // Add hidden input
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = inputName;
+        input.value = value;
+        input.id = 'input-' + prefix + '-' + value;
+        inputsContainer.appendChild(input);
+
+        // Reset select
+        select.value = "";
+    }
+
+    function removeTag(element, prefix, value) {
+        // Remove visual tag (parent of the span clicked)
+        element.parentElement.remove();
+
+        // Remove hidden input
+        var input = document.getElementById('input-' + prefix + '-' + value);
+        if (input) input.remove();
+    }
+</script>
+
+<style>
+    .tag-input-container {
+        border: 1px solid #333;
+        padding: 0.5rem;
+        background: #111;
+        border-radius: 4px;
+        min-height: 40px;
+    }
+    .tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .admin-tag {
+        background: #333;
+        color: #ddd;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .remove-tag {
+        cursor: pointer;
+        font-weight: bold;
+        color: #aaa;
+    }
+    .remove-tag:hover {
+        color: #fff;
+    }
+    .tag-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .admin-select-sm {
+        background: #222;
+        color: #fff;
+        border: 1px solid #444;
+        padding: 0.3rem;
+        border-radius: 3px;
+        font-size: 0.9rem;
+        flex-grow: 1;
+    }
+</style>

@@ -1,0 +1,71 @@
+@model GameLoggd.Models.ViewModels.GamesIndexViewModel
+@{
+    ViewData["Title"] = "Games";
+}
+
+<div class="page-container" style="padding: 2rem 1.5rem;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; text-shadow: 0 0 20px rgba(0,0,0,0.5);">Browse Games</h1>
+        <div style="font-size: 1rem; color: var(--text-secondary);">@Model.Games.Count games found</div>
+    </div>
+
+    <!-- FILTERS -->
+    <form method="get" action="/games" style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+        
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Search</label>
+            <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search titles..." style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;" />
+        </div>
+
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Genre</label>
+            <select name="genre" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
+                <option value="">All Genres</option>
+                @foreach(var g in Model.AvailableGenres)
+                {
+                    <!option value="@g.Slug" @(Model.SelectedGenre == g.Slug ? "selected" : "")>@g.Name</!option>
+                }
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Platform</label>
+            <select name="platform" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
+                <option value="">All Platforms</option>
+                @foreach(var p in Model.AvailablePlatforms)
+                {
+                    <!option value="@p.Slug" @(Model.SelectedPlatform == p.Slug ? "selected" : "")>@p.Name</!option>
+                }
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Sort By</label>
+            <select name="sort" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
+                 <!option value="newest" @(Model.SelectedSort == "newest" ? "selected" : "")>Newest Added</!option>
+                 <!option value="oldest" @(Model.SelectedSort == "oldest" ? "selected" : "")>Oldest Added</!option>
+                 <!option value="year_desc" @(Model.SelectedSort == "year_desc" ? "selected" : "")>Release Year (Newest)</!option>
+                 <!option value="year_asc" @(Model.SelectedSort == "year_asc" ? "selected" : "")>Release Year (Oldest)</!option>
+                 <!option value="title" @(Model.SelectedSort == "title" ? "selected" : "")>Title (A-Z)</!option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary" style="padding: 0.6rem 1.5rem; height: 42px;">Filter</button>
+        <a href="/games" style="color: var(--text-secondary); text-decoration: underline; font-size: 0.9rem; padding-bottom: 0.7rem;">Clear</a>
+    </form>
+
+    <!-- GRID -->
+    @if (Model.Games.Any())
+    {
+        @await Html.PartialAsync("_GameGrid", Model.Games)
+    }
+    else
+    {
+        <div style="text-align: center; padding: 6rem; color: var(--text-secondary); background: var(--bg-card); border-radius: 1rem; border: 1px dashed var(--border-color);">
+            <p style="margin-bottom: 1rem; font-size: 1.1rem;">No games found matching your filters.</p>
+            <a href="/games" style="color: var(--neon-cyan); font-weight: 500;">Clear filters and try again →</a>
+        </div>
+    }
+
+</div>

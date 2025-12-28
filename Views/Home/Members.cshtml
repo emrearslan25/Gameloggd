@@ -1,0 +1,47 @@
+@model List<GameLoggd.Models.ViewModels.MemberViewModel>
+@{
+    ViewData["Title"] = "Members";
+}
+
+<section class="lists-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h2>Members</h2>
+        </div>
+
+        <div class="members-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="member-card" style="background: var(--bg-card); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; position: relative;">
+                        <div class="member-avatar">
+                            <div class="avatar-circle" style="width: 3rem; height: 3rem; border-radius: 50%; background: linear-gradient(to bottom right, #00f0ff, #b830ff); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.25rem;">
+                                @(item.User.UserName?.Substring(0, 1).ToUpper() ?? "?")
+                            </div>
+                        </div>
+                        <div class="member-info" style="flex: 1;">
+                            <h3 style="margin: 0; font-size: 1.1rem;"><a href="/user/@item.User.UserName" style="color: white; text-decoration: none;">@item.User.UserName</a></h3>
+                            <span style="font-size: 0.85rem; color: var(--text-secondary);">Member</span>
+                        </div>
+                        
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <form method="post" action="/toggle-follow">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="targetId" value="@item.User.Id" />
+                                <button type="submit" class="btn-follow @(item.IsFollowing ? "following" : "")">
+                                    @(item.IsFollowing ? "Unfollow" : "Follow")
+                                </button>
+                            </form>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">No members found.</p>
+            }
+        </div>
+    </div>
+</section>

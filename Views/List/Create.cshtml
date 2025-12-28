@@ -1,0 +1,36 @@
+@model GameLoggd.Models.Domain.UserList
+
+@{
+    ViewData["Title"] = "Create New List";
+}
+
+<div class="page-container" style="max-width: 600px; padding-top: 3rem;">
+    <div style="margin-bottom: 2rem;">
+        <a asp-action="Index" style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to lists
+        </a>
+        <h1>Create New List</h1>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 2rem;">
+        <form asp-action="Create">
+            <div style="margin-bottom: 1.5rem;">
+                <label asp-for="Title" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">List Title</label>
+                <input asp-for="Title" class="search-input" style="width: 100%; border-radius: 0.5rem; padding: 0.75rem 1rem;" placeholder="e.g. Top 10 Horror Games" autofocus />
+                <span asp-validation-for="Title" class="text-danger" style="color: #ff4444; font-size: 0.875rem; display: block; margin-top: 0.25rem;"></span>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label asp-for="Description" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Description <span style="font-weight: 400; opacity: 0.7;">(Optional)</span></label>
+                <textarea asp-for="Description" class="search-input" rows="4" style="width: 100%; border-radius: 0.5rem; padding: 0.75rem 1rem; resize: vertical; min-height: 100px;" placeholder="What is this list about?"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Create List</button>
+            </div>
+        </form>
+    </div>
+</div>

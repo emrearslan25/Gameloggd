@@ -1,0 +1,251 @@
+@model GameLoggd.Models.ViewModels.UserProfileViewModel
+
+@{
+    ViewData["Title"] = Model.User.UserName;
+}
+
+<div class="profile-hero" style="background: linear-gradient(to bottom, rgba(10,10,10,0.3), var(--bg-dark)), url('@(string.IsNullOrEmpty(Model.User.CoverPhotoPath) ? $"https://ui-avatars.com/api/?name={Model.User.UserName}&background=random&size=512&font-size=0.33" : Model.User.CoverPhotoPath)'); background-size: cover; background-position: center;">
+    <div class="page-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                @if (!string.IsNullOrEmpty(Model.User.ProfilePicturePath))
+                {
+                    <img src="@Model.User.ProfilePicturePath" alt="@Model.User.UserName" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                }
+                else
+                {
+                    @Model.User.UserName.ToUpper()[0]
+                }
+            </div>
+            
+            <div class="profile-info">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h1 style="font-size: 2.5rem; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">@Model.User.UserName</h1>
+                        <p class="profile-username">@@@Model.User.UserName</p>
+                        <p class="profile-bio">@(string.IsNullOrEmpty(Model.User.Bio) ? "Just another gamer enjoying the digital worlds." : Model.User.Bio)</p>
+                    </div>
+                    
+                    @if (User.Identity.IsAuthenticated && User.Identity.Name != Model.User.UserName)
+                    {
+                        <form asp-action="@(Model.IsFollowing ? "UnfollowUser" : "FollowUser")" asp-controller="Home" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="targetUserId" value="@Model.User.Id" />
+                            <button type="submit" class="@(Model.IsFollowing ? "btn-secondary" : "btn-primary")">
+                                @(Model.IsFollowing ? "Following" : "Follow")
+                            </button>
+                        </form>
+                    }
+                    else if (User.Identity.IsAuthenticated && User.Identity.Name == Model.User.UserName)
+                    {
+                         <a href="/account/manage" class="btn-secondary" style="text-decoration: none; font-size: 0.9rem;">Edit Profile</a>
+                    }
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat">
+                        <div class="stat-value">@Model.PlayedGames.Count</div>
+                        <div class="stat-label">Games</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">@Model.Reviews.Count</div>
+                        <div class="stat-label">Reviews</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">@Model.FollowersCount</div>
+                        <div class="stat-label">Followers</div>
+                    </div>
+                     <div class="stat">
+                        <div class="stat-value">@Model.FollowingCount</div>
+                        <div class="stat-label">Following</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-container" style="padding-top: 0;">
+    <!-- Tabs Navigation -->
+    <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; position: sticky; top: 0; background: var(--bg-dark); z-index: 10; padding-top: 1rem;">
+        <div style="display: flex; gap: 2rem;">
+            <button onclick="switchTab('reviews')" class="tab-btn active" id="tab-reviews" style="background: none; border: none; color: white; padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid var(--neon-cyan); font-weight: 500;">Reviews</button>
+            <button onclick="switchTab('lists')" class="tab-btn" id="tab-lists" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Lists (@Model.Lists.Count)</button>
+            <button onclick="switchTab('playing')" class="tab-btn" id="tab-playing" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Playing (@Model.PlayingGames.Count)</button>
+            <button onclick="switchTab('backlog')" class="tab-btn" id="tab-backlog" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Backlog (@Model.BacklogGames.Count)</button>
+            <button onclick="switchTab('played')" class="tab-btn" id="tab-played" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Played (@Model.PlayedGames.Count)</button>
+            <button onclick="switchTab('likes')" class="tab-btn" id="tab-likes" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Likes (@Model.LikedReviews.Count)</button>
+        </div>
+    </div>
+
+    <!-- Tab Contents -->
+    
+    <!-- Reviews Tab -->
+    <div id="content-reviews" class="tab-content">
+        @if (Model.Reviews.Any())
+        {
+            <div class="reviews-list">
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="review-card">
+                        <div class="review-avatar avatar-purple" style="border-radius: 4px; width: 60px; height: 80px; overflow: hidden; background: none;">
+                            <img src="@(string.IsNullOrEmpty(review.Game.ImagePath) ? "/images/placeholder_game.jpg" : review.Game.ImagePath)" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="review-content">
+                            <div class="review-header">
+                                <a href="/game/@review.Game.Slug" class="game-link" style="font-weight: 600; font-size: 1.1rem; color: white;">@review.Game.Title</a>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">@review.Game.Year</span>
+                            </div>
+                            
+                            <div class="review-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="star @(i <= review.Rating ? "filled" : "")">★</span>
+                                }
+                            </div>
+                            
+                            <p class="review-text" style="color: #ccc; margin-bottom: 1rem;">@review.Content</p>
+                            
+                            <div style="font-size: 0.8rem; color: #666;">
+                                Reviewed on @review.CreatedAt.ToString("MMM dd, yyyy")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+             <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
+                No reviews yet.
+            </div>
+        }
+    </div>
+
+    <!-- Lists Tab -->
+    <div id="content-lists" class="tab-content" style="display: none;">
+         @if (Model.Lists.Any())
+        {
+            <div class="lists-grid">
+                @foreach (var list in Model.Lists)
+                {
+                    <a href="/list/details/@list.Id" style="text-decoration: none;">
+                        <div class="list-card">
+                            <div class="list-thumbnail">
+                                @if (list.Items.Any())
+                                {
+                                    <div class="thumbnail-grid">
+                                        @foreach (var item in list.Items.Take(4))
+                                        {
+                                            <img src="@(string.IsNullOrEmpty(item.Game?.ImagePath) ? "/images/placeholder_game.jpg" : item.Game.ImagePath)" />
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="list-overlay" style="opacity: 1; background: var(--bg-card);">
+                                        <div class="list-icon">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="list-info">
+                                <h3>@list.Title</h3>
+                                <div class="list-meta">
+                                    <span>@list.Items.Count games</span>
+                                    <span>Updated @list.UpdatedAt.ToString("MMM dd")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
+                No lists created yet.
+            </div>
+        }
+    </div>
+
+    <!-- Playing Tab -->
+    <div id="content-playing" class="tab-content" style="display: none;">
+        @await Html.PartialAsync("_GameGrid", Model.PlayingGames.Select(u => u.Game).ToList())
+    </div>
+
+    <!-- Backlog Tab -->
+    <div id="content-backlog" class="tab-content" style="display: none;">
+        @await Html.PartialAsync("_GameGrid", Model.BacklogGames.Select(u => u.Game).ToList())
+    </div>
+
+    <!-- Played Tab -->
+    <div id="content-played" class="tab-content" style="display: none;">
+        @await Html.PartialAsync("_GameGrid", Model.PlayedGames.Select(u => u.Game).ToList())
+    </div>
+
+    <!-- Likes Tab -->
+    <div id="content-likes" class="tab-content" style="display: none;">
+        @if (Model.LikedReviews.Any())
+        {
+            <div class="reviews-list">
+                @foreach (var like in Model.LikedReviews)
+                {
+                    <div class="review-card">
+                        <div class="review-avatar avatar-cyan">
+                            @like.Review.User?.UserName.Substring(0,1).ToUpper()
+                        </div>
+                        <div class="review-content">
+                            <div class="review-header">
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">Liked review by</span>
+                                <a href="/user/@like.Review.User?.UserName" class="reviewer-name">@like.Review.User?.UserName</a>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">on</span>
+                                <a href="/game/@like.Review.Game?.Slug" class="game-link">@like.Review.Game?.Title</a>
+                            </div>
+                            <div class="review-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="star @(i <= like.Review.Rating ? "filled" : "")">★</span>
+                                }
+                            </div>
+                            <p class="review-text">"@like.Review.Content"</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+             <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
+                No likes yet.
+            </div>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function switchTab(tabName) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            // Show selected content
+            document.getElementById('content-' + tabName).style.display = 'block';
+            
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.style.color = '#a0a0a0';
+                btn.style.borderBottomColor = 'transparent';
+                btn.classList.remove('active');
+            });
+            // Activate selected button
+            const activeBtn = document.getElementById('tab-' + tabName);
+            activeBtn.style.color = '#fff';
+            activeBtn.style.borderBottomColor = 'var(--neon-cyan)';
+            activeBtn.classList.add('active');
+        }
+    </script>
+}

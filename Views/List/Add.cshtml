@@ -1,0 +1,52 @@
+@model GameLoggd.Models.ViewModels.ListAddGameViewModel
+
+@{
+    ViewData["Title"] = "Add Games to " + Model.ListTitle;
+}
+
+<div class="page-container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+        <a asp-action="Details" asp-route-id="@Model.ListId" style="color: #888; text-decoration: none;">← Back to List</a>
+        <h1 style="margin: 0; font-size: 1.5rem;">Add Games to <span style="color: #ff304f;">@Model.ListTitle</span></h1>
+    </div>
+
+    <!-- Search Form -->
+    <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <form method="get" action="/list/@Model.ListId/add" style="display: flex; gap: 0.5rem;">
+            <input type="text" name="query" value="@Model.Query" placeholder="Search for games..." style="flex: 1; padding: 0.8rem; border-radius: 4px; border: 1px solid #333; background: #222; color: white;" autofocus />
+            <button type="submit" style="background: #444; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 4px; cursor: pointer;">Search</button>
+        </form>
+    </div>
+
+    <!-- Results -->
+    @if (!string.IsNullOrWhiteSpace(Model.Query))
+    {
+        <h2 style="margin-bottom: 1rem; font-size: 1.2rem; color: #ccc;">Search Results</h2>
+        
+        @if (Model.Results.Any())
+        {
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                @foreach (var game in Model.Results)
+                {
+                    <div style="display: flex; align-items: center; gap: 1rem; background: #1a1a1a; padding: 1rem; border-radius: 8px;">
+                        <img src="@(game.ImagePath ?? "/images/placeholder_game.jpg")" style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;" />
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">@game.Title</h3>
+                            <span style="color: #666; font-size: 0.9rem;">@(game.Year?.ToString() ?? "—")</span>
+                        </div>
+                        <form asp-action="AddGame" method="post">
+                            <input type="hidden" name="listId" value="@Model.ListId" />
+                            <input type="hidden" name="gameId" value="@game.Id" />
+                            <input type="hidden" name="returnUrl" value="/list/@Model.ListId/add?query=@Model.Query" />
+                            <button type="submit" style="background: #ff304f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Add</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p style="color: #666;">No games found matching "@Model.Query"</p>
+        }
+    }
+</div>
