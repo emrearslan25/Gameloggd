@@ -1,0 +1,357 @@
+@model GameLoggd.Models.Poker.PokerGame
+
+@{
+    ViewData["Title"] = "Video Poker";
+}
+
+<style>
+    .poker-machine {
+        background-color: #050505;
+        background-image: 
+            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+        border-radius: 1rem;
+        border: 2px solid var(--neon-cyan);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 50px rgba(0,0,0,0.8);
+        padding: 2rem;
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        font-family: 'Courier New', monospace;
+    }
+
+    .paytable {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        border-bottom: 1px solid #333;
+        padding-bottom: 1rem;
+    }
+
+    .pay-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pay-rank { color: var(--neon-purple); font-weight: bold; }
+    .pay-val { color: #fff; }
+
+    .poker-cards {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        perspective: 1000px;
+        margin-bottom: 2rem;
+    }
+
+    .poker-card-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    /* Reuse Blackjack card styles or redefine slightly */
+    .pk-card {
+        width: 100px;
+        height: 140px;
+        background: #111;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: relative;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid #333;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
+
+    .pk-card.red { color: #ff0055; border-color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
+    .pk-card.black { color: #00e5ff; border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+    
+    .pk-card .center-suit { font-size: 3rem; }
+    .pk-card .corner-top { position: absolute; top: 5px; left: 5px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; }
+    .pk-card .corner-bottom { position: absolute; bottom: 5px; right: 5px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; transform: rotate(180deg); }
+
+    /* Held state */
+    .poker-card-container.held .pk-card {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(255, 235, 59, 0.3);
+        border-color: #ffeb3b;
+    }
+
+    .hold-badge {
+        background: #333;
+        color: #555;
+        padding: 5px 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .poker-card-container.held .hold-badge {
+        background: #ffeb3b;
+        color: #000;
+        box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+    }
+
+    .game-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: rgba(0,0,0,0.5);
+        border-radius: 8px;
+        margin-top: auto;
+    }
+
+    .credits-display {
+        font-size: 1.5rem;
+        color: #00ff88;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .pk-btn {
+        padding: 1rem 3rem;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        border: none;
+        font-weight: bold;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .btn-deal { 
+        background: var(--neon-cyan); 
+        color: black; 
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); 
+    }
+    
+    .btn-draw { 
+        background: var(--neon-purple); 
+        color: white; 
+        box-shadow: 0 0 15px rgba(184, 48, 255, 0.4); 
+    }
+
+    .btn-bet {
+        background: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+
+    .message-area {
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+    
+    .message-area.win {
+        color: #ffeb3b; 
+        text-shadow: 0 0 10px #ffeb3b;
+        animation: pulse 1s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<div class="page-container">
+    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Video Poker</h1>
+
+    <div class="poker-machine">
+        <div class="paytable">
+            <div class="pay-item"><span class="pay-rank">ROYAL FLUSH</span><span class="pay-val">800</span></div>
+            <div class="pay-item"><span class="pay-rank">STR. FLUSH</span><span class="pay-val">50</span></div>
+            <div class="pay-item"><span class="pay-rank">4 OF A KIND</span><span class="pay-val">25</span></div>
+            <div class="pay-item"><span class="pay-rank">FULL HOUSE</span><span class="pay-val">9</span></div>
+            <div class="pay-item"><span class="pay-rank">FLUSH</span><span class="pay-val">6</span></div>
+            <div class="pay-item"><span class="pay-rank">STRAIGHT</span><span class="pay-val">4</span></div>
+            <div class="pay-item"><span class="pay-rank">3 OF A KIND</span><span class="pay-val">3</span></div>
+            <div class="pay-item"><span class="pay-rank">TWO PAIR</span><span class="pay-val">2</span></div>
+            <div class="pay-item"><span class="pay-rank">JACKS OR BETTER</span><span class="pay-val">1</span></div>
+        </div>
+
+        <div class="message-area" id="game-message">GOOD LUCK</div>
+
+        <div class="poker-cards" id="cards-area">
+            <!-- Cards 0-4 -->
+            @for(int i=0; i<5; i++) {
+                <div class="poker-card-container" id="card-container-@i" onclick="toggleHold(@i)">
+                    <div class="pk-card" id="card-@i">
+                        <div class="center-suit">?</div>
+                    </div>
+                    <div class="hold-badge" id="badge-@i">HOLD</div>
+                </div>
+            }
+        </div>
+
+        <div class="game-info">
+            <div class="bet-controls">
+                <button class="pk-btn btn-bet" onclick="changeBet(-1)">-</button>
+                <span class="credits-display" style="font-size:1.2rem; margin:0 1rem;">BET: <span id="bet-display">1</span></span>
+                <button class="pk-btn btn-bet" onclick="changeBet(1)">+</button>
+            </div>
+            <div class="credits-info">
+                CREDITS: <span class="credits-display" id="credits-display">@Model.Credits</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="pk-btn btn-deal" id="btn-deal" onclick="deal()">DEAL</button>
+            <button class="pk-btn btn-draw" id="btn-draw" onclick="draw()" style="display:none;">DRAW</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentBet = 1;
+        let heldCards = [false, false, false, false, false];
+        let canDraw = false;
+
+        function changeBet(delta) {
+            if (canDraw) return; // Can't change bet during hand
+            currentBet += delta;
+            if (currentBet < 1) currentBet = 1;
+            if (currentBet > 5) currentBet = 5;
+            document.getElementById('bet-display').innerText = currentBet;
+        }
+
+        function toggleHold(index) {
+            if (!canDraw) return;
+            heldCards[index] = !heldCards[index];
+            updateHoldUI(index);
+        }
+
+        function updateHoldUI(index) {
+            const container = document.getElementById(`card-container-${index}`);
+            if (heldCards[index]) {
+                container.classList.add('held');
+            } else {
+                container.classList.remove('held');
+            }
+        }
+
+        function renderCardUI(index, card) {
+            const el = document.getElementById(`card-${index}`);
+             if (!card || card.suit === undefined) {
+                 // Hidden or back
+                 el.className = 'pk-card';
+                 el.innerHTML = '<div class="center-suit">?</div>';
+                 return;
+             }
+
+            const isRed = card.suit === 0 || card.suit === 1; 
+            const colorClass = isRed ? 'red' : 'black';
+            const suits = ['♥', '♦', '♣', '♠'];
+            const suitSymbol = suits[card.suit];
+            
+            let rankStr = card.rank;
+            if (card.rank === 11) rankStr = 'J';
+            else if (card.rank === 12) rankStr = 'Q';
+            else if (card.rank === 13) rankStr = 'K';
+            else if (card.rank === 14) rankStr = 'A';
+
+            el.className = `pk-card ${colorClass}`;
+            el.innerHTML = `
+                <div class="corner-top"><span>${rankStr}</span><span>${suitSymbol}</span></div>
+                <div class="center-suit">${suitSymbol}</div>
+                <div class="corner-bottom"><span>${rankStr}</span><span>${suitSymbol}</span></div>
+            `;
+        }
+
+        async function deal() {
+            try {
+                // Reset holds
+                heldCards = [false, false, false, false, false];
+                for(let i=0; i<5; i++) updateHoldUI(i);
+
+                const response = await fetch('/poker/start', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value },
+                    body: JSON.stringify(currentBet)
+                });
+                
+                if (!response.ok) {
+                    alert(await response.text());
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // Update UI
+                document.getElementById('credits-display').innerText = data.credits;
+                data.hand.forEach((c, i) => renderCardUI(i, c));
+                
+                document.getElementById('game-message').innerText = "HOLD cards to keep, then DRAW.";
+                document.getElementById('game-message').className = "message-area";
+
+                canDraw = true;
+                document.getElementById('btn-deal').style.display = 'none';
+                document.getElementById('btn-draw').style.display = 'block';
+
+            } catch (err) { console.error(err); }
+        }
+
+        async function draw() {
+             try {
+                const response = await fetch('/poker/draw', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value },
+                    body: JSON.stringify(heldCards)
+                });
+                
+                const data = await response.json();
+                
+                // Update UI
+                document.getElementById('credits-display').innerText = data.credits;
+                data.hand.forEach((c, i) => renderCardUI(i, c));
+                
+                document.getElementById('game-message').innerText = data.message;
+                if (data.payout > 0) {
+                     document.getElementById('game-message').className = "message-area win";
+                }
+
+                canDraw = false;
+                document.getElementById('btn-deal').style.display = 'block';
+                document.getElementById('btn-draw').style.display = 'none';
+                
+                // Reset holds visually for next game (but data is reset in deal)
+                 heldCards = [false, false, false, false, false];
+                 for(let i=0; i<5; i++) updateHoldUI(i);
+
+            } catch (err) { console.error(err); }
+        }
+    </script>
+}

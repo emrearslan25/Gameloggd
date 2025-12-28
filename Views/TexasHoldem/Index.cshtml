@@ -1,0 +1,364 @@
+@model GameLoggd.Models.Poker.TexasHoldemGame
+
+@{
+    ViewData["Title"] = "Texas Hold'em";
+}
+
+<style>
+    .poker-room {
+        background-color: #050505;
+        background-image: 
+            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+        min-height: 800px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        font-family: 'Courier New', monospace;
+        color: #fff;
+    }
+
+
+    .poker-table {
+        position: relative;
+        width: 900px; /* Wider table */
+        height: 450px;
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        border-radius: 250px;
+        border: 4px solid var(--neon-cyan);
+        box-shadow: 
+            0 0 20px rgba(0, 255, 255, 0.2),
+            inset 0 0 100px rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 80px 0; /* More vertical space */
+    }
+
+    .community-cards {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 0; /* Centered */
+        padding: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        background: rgba(0,0,0,0.4);
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .pot-display {
+        position: absolute;
+        top: 25%; /* Higher up */
+        font-size: 1rem;
+        background: rgba(0,0,0,0.8);
+        padding: 5px 15px;
+        border-radius: 20px;
+        border: 1px solid var(--neon-purple);
+        color: var(--neon-purple);
+        box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+        z-index: 5;
+    }
+
+    .seat {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 200px;
+    }
+
+    .dealer-seat { top: -110px; } /* Push out further */
+    .player-seat { bottom: -110px; }
+
+    .hole-cards {
+        display: flex;
+        gap: 5px;
+    }
+
+    .chips-stack {
+        margin-top: 10px;
+        font-size: 1.1rem;
+        color: #ffd700;
+        text-shadow: 0 0 5px #ffd700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .chip-icon {
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+        border-radius: 50%;
+        border: 2px dashed #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Reuse Blackjack card styles */
+    .pk-card {
+        width: 70px;
+        height: 100px;
+        background: #111;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        position: relative;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        border: 2px solid #333;
+        transition: transform 0.3s;
+    }
+
+    .pk-card.red { 
+        color: #ff0055; 
+        border-color: #ff0055;
+        box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
+    }
+    
+    .pk-card.black { 
+        color: #00e5ff; 
+        border-color: #00e5ff;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+    
+    .pk-card.hidden {
+        background: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 5px, #222 5px, #222 10px);
+        border: 2px solid #555;
+        box-shadow: none;
+    }
+    .pk-card.hidden .center-suit, .pk-card.hidden .corner-top, .pk-card.hidden .corner-bottom { display: none; }
+
+    .controls-bar {
+        background: rgba(10,10,10,0.9);
+        padding: 1rem;
+        border-radius: 10px;
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        border: 1px solid #333;
+    }
+
+    .action-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.2s;
+        background: transparent;
+        border: 2px solid #555;
+        color: #aaa;
+    }
+    
+    .action-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .btn-fold { border-color: #ff0055; color: #ff0055; box-shadow: 0 0 5px rgba(255,0,85,0.2); }
+    .btn-check { border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 5px rgba(0,229,255,0.2); }
+    .btn-call { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.2); }
+    .btn-raise { border-color: #ffeb3b; color: #ffeb3b; box-shadow: 0 0 5px rgba(255,235,59,0.2); }
+    
+    .btn-start { 
+        background: var(--neon-cyan); 
+        color: black; 
+        font-size: 1.2rem; 
+        padding: 15px 30px; 
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); 
+        border: none;
+    }
+
+    .game-log {
+        margin-top: 1rem;
+        color: #fff;
+        font-size: 1.1rem;
+        height: 1.5rem;
+        text-shadow: 0 0 5px rgba(255,255,255,0.5);
+    }
+    
+    .dealer-bubble {
+        position: absolute;
+        top: -50px;
+        right: -130px;
+        background: #000;
+        color: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--neon-cyan);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        font-weight: bold;
+        width: 150px;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 10;
+    }
+    
+    .dealer-bubble::after {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent var(--neon-cyan) transparent transparent;
+        transform: translateY(-50%);
+    }
+
+    .dealer-bubble.show { opacity: 1; }
+</style>
+
+<div class="page-container">
+    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Texas Hold'em</h1>
+
+    <div class="poker-room">
+        
+        <div class="poker-table">
+            <!-- Dealer Seat -->
+            <div class="seat dealer-seat">
+                <div class="hole-cards" id="dealer-cards">
+                    <div class="pk-card hidden"></div>
+                    <div class="pk-card hidden"></div>
+                </div>
+                <div class="chips-stack">
+                    <div class="chip-icon"></div>
+                    <span id="dealer-chips">1000</span>
+                </div>
+                <div class="dealer-bubble" id="dealer-msg">Check</div>
+            </div>
+
+            <!-- Pot -->
+            <div class="pot-display">
+                Pot: <span id="pot-amount">0</span>
+            </div>
+
+            <!-- Community Cards -->
+            <div class="community-cards" id="community-cards">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Player Seat -->
+            <div class="seat player-seat">
+                <div class="hole-cards" id="player-cards">
+                </div>
+                <div class="chips-stack">
+                    <div class="chip-icon"></div>
+                    <span id="player-chips">1000</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-log" id="game-message">Press DEAL to start</div>
+
+        <div class="controls-bar" id="game-controls" style="display:none;">
+            <button class="action-btn btn-fold" onclick="sendAction('fold')">Fold</button>
+            <button class="action-btn btn-check" onclick="sendAction('check')">Check</button>
+            <button class="action-btn btn-call" onclick="sendAction('call')">Call</button>
+            <button class="action-btn btn-raise" onclick="sendAction('raise')">Raise</button>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <button class="action-btn btn-start" id="btn-start" onclick="startGame()">DEAL HAND</button>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function renderCard(card) {
+             if (!card || card.isHidden) {
+                 return `<div class="pk-card hidden"><div class="center-suit"></div></div>`;
+             }
+             const isRed = card.suit === 0 || card.suit === 1; 
+             const colorClass = isRed ? 'red' : 'black';
+             const suits = ['♥', '♦', '♣', '♠'];
+             const suitSymbol = suits[card.suit];
+             
+             let rankStr = card.rank;
+             if (card.rank === 11) rankStr = 'J';
+             else if (card.rank === 12) rankStr = 'Q';
+             else if (card.rank === 13) rankStr = 'K';
+             else if (card.rank === 14) rankStr = 'A';
+
+             return `<div class="pk-card ${colorClass}">
+                        <div class="corner-top"><span>${rankStr}</span><span>${suitSymbol}</span></div>
+                        <div class="center-suit" style="font-size:2rem;">${suitSymbol}</div>
+                        <div class="corner-bottom" style="transform: rotate(180deg);"><span>${rankStr}</span><span>${suitSymbol}</span></div>
+                    </div>`;
+        }
+
+        function updateUI(data) {
+            // Cards
+            document.getElementById('player-cards').innerHTML = data.playerHole.map(renderCard).join('');
+            document.getElementById('dealer-cards').innerHTML = data.dealerHole.map(renderCard).join('');
+            document.getElementById('community-cards').innerHTML = data.community.map(renderCard).join('');
+            
+            // Chips
+            document.getElementById('player-chips').innerText = data.playerChips;
+            document.getElementById('dealer-chips').innerText = data.dealerChips;
+            document.getElementById('pot-amount').innerText = data.pot;
+
+            // Message
+            document.getElementById('game-message').innerText = `${data.stage}: ${data.message}`;
+            
+            if (data.message.includes("Dealer")) {
+                const bubble = document.getElementById('dealer-msg');
+                bubble.innerText = data.message;
+                bubble.classList.add('show');
+                setTimeout(() => bubble.classList.remove('show'), 3000);
+            }
+
+            // Controls
+            if (data.stage === 'GameOver' || data.winner !== null && data.winner !== "") {
+                document.getElementById('game-controls').style.display = 'none';
+                document.getElementById('btn-start').style.display = 'block';
+                document.getElementById('btn-start').innerText = "NEXT HAND";
+            } else {
+                document.getElementById('game-controls').style.display = 'flex';
+                document.getElementById('btn-start').style.display = 'none';
+                
+                // Disable buttons based on turn
+                const btns = document.querySelectorAll('.action-btn');
+                btns.forEach(b => b.disabled = !data.turn);
+            }
+        }
+
+        async function startGame() {
+            try {
+                const response = await fetch('/holdem/start', { 
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value }
+                });
+                if (!response.ok) { alert(await response.text()); return; }
+                const data = await response.json();
+                updateUI(data);
+            } catch (err) { console.error(err); }
+        }
+
+        async function sendAction(action) {
+            try {
+                const response = await fetch('/holdem/action', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value },
+                    body: JSON.stringify(action)
+                });
+                const data = await response.json();
+                updateUI(data);
+            } catch (err) { console.error(err); }
+        }
+    </script>
+}

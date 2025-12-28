@@ -1,0 +1,204 @@
+@{
+    ViewData["Title"] = "Casino Lobby";
+}
+
+<style>
+    .casino-lobby {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, #111 0%, #000 100%);
+        padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .lobby-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .lobby-title {
+        font-size: 4rem;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        margin-bottom: 0.5rem;
+        text-shadow: 
+            0 0 10px rgba(0, 255, 255, 0.5),
+            0 0 20px rgba(0, 255, 255, 0.3),
+            0 0 30px rgba(0, 255, 255, 0.1);
+    }
+    
+    .lobby-subtitle {
+        font-size: 1.2rem;
+        color: #aaa;
+        letter-spacing: 2px;
+    }
+
+    .games-grid {
+        display: flex;
+        gap: 3rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 1200px;
+    }
+
+    .game-card {
+        width: 300px;
+        height: 400px;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: #1a1a1a;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border: 2px solid transparent;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .game-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    /* Game Specific Styles */
+    .game-card.blackjack {
+        border-color: var(--neon-purple);
+    }
+    .game-card.blackjack:hover {
+        box-shadow: 0 0 30px rgba(188, 19, 254, 0.4);
+    }
+    
+    .game-card.poker {
+        border-color: var(--neon-cyan);
+    }
+    .game-card.poker:hover {
+        box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+    }
+
+    .game-card.holdem {
+        border-color: #ffd700;
+    }
+    .game-card.holdem:hover {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+
+    .card-image {
+        flex: 1;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    
+    .card-image::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to top, #1a1a1a 10%, transparent);
+    }
+
+    /* Fallback visual if no images */
+    .card-visual {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 5rem;
+    }
+    
+    .blackjack .card-visual { background: linear-gradient(45deg, #2a0a2a, #111); color: var(--neon-purple); }
+    .poker .card-visual { background: linear-gradient(45deg, #0a2a2a, #111); color: var(--neon-cyan); }
+    .holdem .card-visual { background: linear-gradient(45deg, #2a2a0a, #111); color: #ffd700; }
+
+    .card-content {
+        padding: 2rem;
+        background: #1a1a1a;
+        z-index: 2;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .game-title {
+        font-size: 1.8rem;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+    
+    .game-desc {
+        color: #888;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .play-btn {
+        margin-top: 1rem;
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: background 0.3s;
+    }
+    
+    .game-card:hover .play-btn {
+        background: #fff;
+        color: #000;
+        font-weight: bold;
+    }
+
+    @@keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="casino-lobby">
+    <div class="lobby-header">
+        <h1 class="lobby-title">Casino</h1>
+        <p class="lobby-subtitle">Experience the Neon Nightlife</p>
+    </div>
+
+    <div class="games-grid">
+        <!-- Blackjack -->
+        <a href="/blackjack" class="game-card blackjack">
+            <div class="card-visual">♠️</div>
+            <div class="card-content">
+                <div class="game-title">Blackjack</div>
+                <div class="game-desc">The classic game of 21. Beat the dealer in style.</div>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+
+        <!-- Video Poker -->
+        <a href="/poker" class="game-card poker">
+            <div class="card-visual">♣️</div>
+            <div class="card-content">
+                <div class="game-title">Video Poker</div>
+                <div class="game-desc">Jacks or Better. Strategy meets luck in this retro classic.</div>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+
+        <!-- Texas Hold'em -->
+        <a href="/holdem" class="game-card holdem">
+            <div class="card-visual">♦️</div>
+            <div class="card-content">
+                <div class="game-title">Texas Hold'em</div>
+                <div class="game-desc">Heads Up vs Bot. Test your poker face and betting skills.</div>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+    </div>
+</div>

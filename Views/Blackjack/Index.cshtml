@@ -1,0 +1,409 @@
+@model GameLoggd.Models.Blackjack.BlackjackGame
+
+@{
+    ViewData["Title"] = "Blackjack";
+}
+
+<style>
+    .blackjack-table {
+        background-color: #050505;
+        background-image: 
+            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+        border-radius: 1rem;
+        border: 2px solid var(--neon-purple);
+        box-shadow: 0 0 20px rgba(188, 19, 254, 0.3), inset 0 0 50px rgba(0,0,0,0.8);
+        padding: 2rem;
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        font-family: 'Courier New', monospace;
+    }
+
+    .dealer-area,.player-area {
+        text-align: center;
+    }
+
+    .area-label {
+        font-size: 1.5rem;
+        color: var(--neon-cyan);
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        letter-spacing: 2px;
+    }
+
+    .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        min-height: 140px;
+        perspective: 1000px;
+    }
+
+    .bj-card {
+        width: 100px;
+        height: 140px;
+        background: #111;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: relative;
+        transition: transform 0.3s ease, margin-top 0.3s;
+        border: 2px solid #333;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
+
+    .bj-card.red { 
+        color: #ff0055; /* Neon Pink */
+        border-color: #ff0055;
+        box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+    }
+    
+    .bj-card.black { 
+        color: #00e5ff; /* Neon Cyan */
+        border-color: #00e5ff;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    }
+
+    .bj-card .corner-top {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-size: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bj-card .corner-bottom {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        font-size: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: rotate(180deg);
+    }
+    
+    .bj-card .center-suit {
+        font-size: 3rem;
+        filter: drop-shadow(0 0 5px currentColor);
+    }
+
+    .bj-card.hidden {
+        background: repeating-linear-gradient(
+            45deg,
+            #1a1a1a,
+            #1a1a1a 10px,
+            #222 10px,
+            #222 20px
+        );
+        border: 2px solid #555;
+        color: #555;
+        box-shadow: none;
+    }
+    
+    .bj-card.hidden .center-suit {
+        color: #333;
+        text-shadow: 0 0 5px rgba(255,255,255,0.1);
+    }
+
+    .score-badge {
+        display: inline-block;
+        background: #000;
+        color: #fff;
+        padding: 5px 20px;
+        border-radius: 4px;
+        font-size: 1.2rem;
+        margin-top: 15px;
+        border: 1px solid var(--neon-purple);
+        box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
+        text-shadow: 0 0 5px var(--neon-purple);
+    }
+
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .bj-btn {
+        padding: 1rem 3rem;
+        font-size: 1.1rem;
+        font-family: inherit;
+        text-transform: uppercase;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        font-weight: bold;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bj-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+    }
+
+    .bj-btn:active {
+        transform: translateY(1px);
+    }
+
+    .btn-hit { 
+        background: transparent;
+        border: 2px solid #ffeb3b;
+        color: #ffeb3b;
+        box-shadow: 0 0 10px rgba(255, 235, 59, 0.2);
+    }
+    
+    .btn-stand { 
+        background: transparent;
+        border: 2px solid #ff0055;
+        color: #ff0055;
+        box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
+    }
+    
+    .btn-start { 
+        background: var(--neon-cyan); 
+        color: black; 
+        font-weight: 800;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        border: none;
+    }
+
+    .btn-restart { 
+        background: transparent;
+        border: 2px solid #00ff88;
+        color: #00ff88;
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    }
+
+    .message-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        text-align: center;
+        display: none;
+        z-index: 100;
+        border: 2px solid var(--neon-purple);
+        box-shadow: 0 0 50px rgba(188, 19, 254, 0.3);
+        min-width: 300px;
+    }
+
+    .message-overlay h2 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    /* ANIMATIONS */
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px) rotate(10deg);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0) rotate(0);
+        }
+    }
+
+    @@keyframes popIn {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    @@keyframes neonPulse {
+        0% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de; }
+        50% { box-shadow: 0 0 2px #fff, 0 0 5px #fff, 0 0 10px #ff00de, 0 0 15px #ff00de; }
+        100% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de; }
+    }
+
+    .bj-card.animate-enter {
+        animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .message-overlay.show {
+        display: block;
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    .message-overlay.show h2 {
+        animation: neonPulse 1.5s infinite alternate;
+    }
+</style>
+
+<div class="page-container">
+    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Blackjack</h1>
+
+    <div class="blackjack-table">
+        <div class="dealer-area">
+            <div class="area-label">Dealer</div>
+            <div class="cards-container" id="dealer-cards">
+                <!-- Cards injected here -->
+            </div>
+            <div class="score-badge" id="dealer-score">0</div>
+        </div>
+
+        <div class="message-overlay" id="game-message">
+            <h2 id="result-text">YOU WIN!</h2>
+            <button class="bj-btn btn-restart" onclick="startGame()">PLAY AGAIN</button>
+        </div>
+
+        <div class="player-area">
+            <div class="area-label">You</div>
+            <div class="cards-container" id="player-cards">
+                <!-- Cards injected here -->
+            </div>
+            <div class="score-badge" id="player-score">0</div>
+
+            <div class="controls" id="game-controls" style="display: none;">
+                <button class="bj-btn btn-hit" onclick="hit()">HIT</button>
+                <button class="bj-btn btn-stand" onclick="stand()">STAND</button>
+            </div>
+            <div class="controls" id="start-controls">
+                <button class="bj-btn btn-start" onclick="startGame()">DEAL CARDS</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Store previous state to detect new cards for animation
+        let prevPlayerCardCount = 0;
+        let prevDealerCardCount = 0;
+
+        function createCardHtml(card, index, isNew) {
+            const animationClass = isNew ? 'animate-enter' : '';
+            const styleDelay = isNew ? `animation-delay: ${index * 100}ms` : '';
+
+            if (card.isHidden) {
+                return `<div class="bj-card hidden ${animationClass}" style="${styleDelay}">
+                            <div class="center-suit">?</div>
+                        </div>`;
+            }
+
+            const isRed = card.suit === 0 || card.suit === 1; // Hearts(0), Diamonds(1)
+            const colorClass = isRed ? 'red' : 'black';
+            
+            const suits = ['♥', '♦', '♣', '♠'];
+            const suitSymbol = suits[card.suit];
+            
+            let rankStr = card.rank;
+            if (card.rank === 11) rankStr = 'J';
+            else if (card.rank === 12) rankStr = 'Q';
+            else if (card.rank === 13) rankStr = 'K';
+            else if (card.rank === 14) rankStr = 'A';
+
+            return `<div class="bj-card ${colorClass} ${animationClass}" style="${styleDelay}">
+                        <div class="corner-top">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
+                        <div class="center-suit">${suitSymbol}</div>
+                        <div class="corner-bottom">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
+                    </div>`;
+        }
+
+        function updateBoard(gameState) {
+            const dealerContainer = document.getElementById('dealer-cards');
+            const playerContainer = document.getElementById('player-cards');
+            
+            // Render Dealer Cards
+            // Smarter approach: Check diff
+            const dealerHtml = gameState.dealerHand.cards.map((c, i) => createCardHtml(c, i, i >= prevDealerCardCount)).join('');
+            const playerHtml = gameState.playerHand.cards.map((c, i) => createCardHtml(c, i, i >= prevPlayerCardCount)).join('');
+
+            dealerContainer.innerHTML = dealerHtml;
+            playerContainer.innerHTML = playerHtml;
+
+            // Update counts for next turn
+            prevDealerCardCount = gameState.dealerHand.cards.length;
+            prevPlayerCardCount = gameState.playerHand.cards.length;
+
+            if (prevDealerCardCount === 0 && prevPlayerCardCount === 0) {
+                 // Reset happened
+            }
+
+            // Update Scores
+            document.getElementById('dealer-score').innerText = gameState.dealerHand.score;
+            document.getElementById('player-score').innerText = gameState.playerHand.score;
+
+            // Update Controls & Message
+            const msgOverlay = document.getElementById('game-message');
+            if (gameState.isGameOver) {
+                document.getElementById('game-controls').style.display = 'none';
+                document.getElementById('start-controls').style.display = 'none';
+                
+                document.getElementById('result-text').innerText = gameState.message;
+                msgOverlay.classList.add('show');
+                // Ensure overlay is display block
+                msgOverlay.style.display = 'block';
+            } else {
+                document.getElementById('game-controls').style.display = 'flex';
+                document.getElementById('start-controls').style.display = 'none';
+                msgOverlay.classList.remove('show');
+                msgOverlay.style.display = 'none'; 
+            }
+        }
+
+        async function startGame() {
+            // Reset counts so deal animations trigger
+            prevPlayerCardCount = 0;
+            prevDealerCardCount = 0;
+            try {
+                const response = await fetch('/blackjack/start', { 
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value }
+                });
+                const data = await response.json();
+                updateBoard(data);
+            } catch (err) { console.error(err); }
+        }
+
+        async function hit() {
+            try {
+                const response = await fetch('/blackjack/hit', { 
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value }
+                });
+                const data = await response.json();
+                updateBoard(data);
+            } catch (err) { console.error(err); }
+        }
+
+        async function stand() {
+            try {
+                 const response = await fetch('/blackjack/stand', { 
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': document.getElementsByName('__RequestVerificationToken')[0]?.value }
+                });
+                const data = await response.json();
+                updateBoard(data);
+            } catch (err) { console.error(err); }
+        }
+    </script>
+}
