@@ -1,0 +1,42 @@
+<!-- Bottom-right Messages Dock (button + panel) -->
+<div id="messages-dock" class="fixed bottom-4 right-4 z-[60] w-80 max-w-[90vw]">
+    <div id="chat-sidebar"
+         class="absolute bottom-12 left-0 right-0 h-[420px] max-h-[70vh] bg-background-dark/95 backdrop-blur-md border border-white/10 shadow-2xl rounded-xl rounded-b-none overflow-hidden transform translate-y-2 opacity-0 pointer-events-none transition-all duration-300 flex flex-col">
+    <!-- Header -->
+    <div class="px-5 py-4 border-b border-white/5 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-white">Messages</h2>
+        <button id="sidebar-close-btn" type="button" class="text-white/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+
+    <!-- Sections (scrolls) -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+
+        <!-- Recent Conversations -->
+        <div>
+            <h3 class="text-xs uppercase tracking-wider text-white/30 font-bold mb-3 pl-2">Recent</h3>
+            <div id="sidebar-recent-list" class="space-y-1">
+                <div class="text-white/20 text-sm italic pl-2">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Friends -->
+        <div>
+            <h3 class="text-xs uppercase tracking-wider text-white/30 font-bold mb-3 pl-2">Friends</h3>
+            <div id="sidebar-friends-list" class="space-y-1">
+                <div class="text-white/20 text-sm italic pl-2">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <button id="chat-sidebar-toggle" type="button"
+            class="w-full h-12 rounded-xl rounded-t-none bg-white/5 border border-white/10 text-white/80 hover:text-primary hover:border-primary/40 hover:bg-white/10 transition-colors flex items-center justify-between px-5">
+        <span class="text-sm font-bold uppercase tracking-wider">Messages</span>
+        <span class="material-symbols-outlined text-xl">chat_bubble</span>
+    </button>
+
+    <!-- Tailwind class safelist for CDN JIT (no visual impact) -->
+    <span class="hidden rounded-b-none rounded-t-none"></span>
+</div>

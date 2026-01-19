@@ -65,8 +65,8 @@
                                 <span class="truncate">@(Model.IsFollowing ? "Unfollow" : "Follow")</span>
                             </button>
                         </form>
-                        <!-- Message Button Placeholder -->
-                         <button class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 bg-primary text-background-dark hover:brightness-110 transition-all font-bold uppercase tracking-wider text-xs">
+                        <!-- Message Button -->
+                         <button id="btn-message-user" data-username="@Model.User.UserName" class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 bg-primary text-background-dark hover:brightness-110 transition-all font-bold uppercase tracking-wider text-xs">
                             <span class="truncate">Message</span>
                         </button>
                     }

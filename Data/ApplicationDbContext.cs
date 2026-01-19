@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<ReviewComment> ReviewComments => Set<ReviewComment>();
     public DbSet<UserListLike> UserListLikes => Set<UserListLike>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -115,6 +116,19 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.Property(x => x.Slug).HasMaxLength(100).IsRequired();
             b.Property(x => x.IconClass).HasMaxLength(100);
             b.HasIndex(x => x.Slug).IsUnique();
+        });
+
+        builder.Entity<Message>(b =>
+        {
+            b.HasKey(x => x.Id);
+            b.HasOne(x => x.Sender)
+                .WithMany()
+                .HasForeignKey(x => x.SenderId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade cycles
+            b.HasOne(x => x.Receiver)
+                .WithMany()
+                .HasForeignKey(x => x.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
