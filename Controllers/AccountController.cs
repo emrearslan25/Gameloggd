@@ -80,6 +80,12 @@ public class AccountController : Controller
             return View("Index", new AccountPageViewModel { Login = model, Register = new RegisterViewModel() });
         }
 
+        // Admins should land in the admin panel, not the normal user area.
+        if (await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            return Redirect("/admin");
+        }
+
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
@@ -100,9 +106,19 @@ public class AccountController : Controller
             return View("Index", new AccountPageViewModel { Login = new LoginViewModel(), Register = model });
         }
 
+        var normalizedUsername = (model.Username ?? string.Empty).Trim();
+        if (string.Equals(normalizedUsername, "admin", StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(RegisterViewModel.Username), "This username is reserved.");
+            ViewData["Mode"] = "register";
+            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["Title"] = "Account";
+            return View("Index", new AccountPageViewModel { Login = new LoginViewModel(), Register = model });
+        }
+
         var user = new ApplicationUser
         {
-            UserName = (model.Username ?? string.Empty).Trim(),
+            UserName = normalizedUsername,
             Email = (model.Email ?? string.Empty).Trim(),
         };
 
@@ -144,6 +160,11 @@ public class AccountController : Controller
         if (user == null)
         {
             return NotFound("User not found.");
+        }
+
+        if (await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            return Redirect("/admin");
         }
 
         var model = new ManageProfileViewModel

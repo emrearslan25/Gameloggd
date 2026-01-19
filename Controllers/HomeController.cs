@@ -27,6 +27,11 @@ public class HomeController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
+        if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+        {
+            return Redirect("/admin");
+        }
+
         // Fetch latest game for hero
         var heroGame = _db.Games.AsNoTracking().OrderByDescending(g => g.CreatedAt).FirstOrDefault();
 
@@ -356,10 +361,28 @@ public class HomeController : Controller
             }
         }
 
+        // Reserve "admin" so it can't be used as a public profile URL.
+        if (string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return NotFound();
+        }
+
         var user = await _userManager.FindByNameAsync(username!);
         if (user == null)
         {
             return NotFound("User not found");
+        }
+
+        // Admins should not have public-facing profiles.
+        if (await _userManager.IsInRoleAsync(user, "Admin"))
+        {
+            // If the admin tries to view their own profile, send them to the admin panel.
+            if (User?.Identity?.IsAuthenticated == true && string.Equals(User.Identity.Name, user.UserName, StringComparison.OrdinalIgnoreCase))
+            {
+                return Redirect("/admin");
+            }
+
+            return NotFound();
         }
 
         var currentUserId = _userManager.GetUserId(User);
@@ -519,7 +542,18 @@ public class HomeController : Controller
     public async Task<IActionResult> Members()
     {
         var currentUserId = _userManager.GetUserId(User);
-        var query = _db.Users.AsNoTracking().Where(u => u.UserName != "admin");
+        var query = _db.Users.AsNoTracking().AsQueryable();
+
+        // Reserve "admin" so it never shows in public member lists.
+        query = query.Where(u => u.UserName == null || !u.UserName.Equals("admin", StringComparison.OrdinalIgnoreCase));
+
+        // Filter out users in the Admin role
+        var adminRoleId = await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync();
+        if (adminRoleId is not null)
+        {
+            var adminUserIds = _db.UserRoles.Where(ur => ur.RoleId == adminRoleId).Select(ur => ur.UserId);
+            query = query.Where(u => !adminUserIds.Contains(u.Id));
+        }
         
         if (!string.IsNullOrEmpty(currentUserId))
         {

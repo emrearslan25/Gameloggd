@@ -21,7 +21,7 @@ public class AdminController : Controller
     }
 
     [HttpGet("/admin")]
-    public async Task<IActionResult> Index([FromQuery] int? gamePage, [FromQuery] int? userPage, [FromQuery] Guid? editGameId = null)
+    public async Task<IActionResult> Index([FromQuery] int? gamePage, [FromQuery] int? userPage, [FromQuery] int? reviewPage, [FromQuery] int? commentPage, [FromQuery] Guid? editGameId = null)
     {
         int pageSize = 10;
         
@@ -39,6 +39,21 @@ public class AdminController : Controller
         }
 
         var users = await PaginatedList<ApplicationUser>.CreateAsync(usersQuery, userPage ?? 1, pageSize);
+
+        var reviewsQuery = _db.Reviews
+            .AsNoTracking()
+            .Include(r => r.Game)
+            .Include(r => r.User)
+            .OrderByDescending(r => r.CreatedAt);
+        var reviews = await PaginatedList<Review>.CreateAsync(reviewsQuery, reviewPage ?? 1, pageSize);
+
+        var commentsQuery = _db.ReviewComments
+            .AsNoTracking()
+            .Include(c => c.User)
+            .Include(c => c.Review)
+                .ThenInclude(r => r.Game)
+            .OrderByDescending(c => c.CreatedAt);
+        var comments = await PaginatedList<ReviewComment>.CreateAsync(commentsQuery, commentPage ?? 1, pageSize);
 
         Game? editing = null;
         if (editGameId is not null)
@@ -61,6 +76,8 @@ public class AdminController : Controller
         {
             Games = games,
             Users = users,
+            Reviews = reviews,
+            ReviewComments = comments,
             EditingGame = editing,
             AvailableGenres = allGenres,
             AvailablePlatforms = allPlatforms,
@@ -68,6 +85,52 @@ public class AdminController : Controller
             TotalGames = totalGames,
             TotalReviews = totalReviews
         });
+    }
+
+    [HttpPost("/admin/reviews/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteReview([FromForm] int id)
+    {
+        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+        if (review is null)
+        {
+            TempData["StatusMessage"] = "Error: Review not found.";
+            TempData["StatusType"] = "danger";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var likes = await _db.ReviewLikes.Where(l => l.ReviewId == id).ToListAsync();
+        if (likes.Count > 0)
+        {
+            _db.ReviewLikes.RemoveRange(likes);
+        }
+
+        _db.Reviews.Remove(review);
+        await _db.SaveChangesAsync();
+
+        TempData["StatusMessage"] = "Review deleted successfully.";
+        TempData["StatusType"] = "success";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("/admin/review-comments/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteReviewComment([FromForm] int id)
+    {
+        var comment = await _db.ReviewComments.FirstOrDefaultAsync(c => c.Id == id);
+        if (comment is null)
+        {
+            TempData["StatusMessage"] = "Error: Comment not found.";
+            TempData["StatusType"] = "danger";
+            return RedirectToAction(nameof(Index));
+        }
+
+        _db.ReviewComments.Remove(comment);
+        await _db.SaveChangesAsync();
+
+        TempData["StatusMessage"] = "Comment deleted successfully.";
+        TempData["StatusType"] = "success";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost("/admin/games/add")]

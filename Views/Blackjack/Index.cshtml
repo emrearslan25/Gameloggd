@@ -19,6 +19,12 @@
 
     <!-- Game Table -->
     <div class="w-full max-w-4xl bg-[#050505] border border-accent-purple/30 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-[0_0_50px_rgba(168,85,247,0.15)] flex flex-col justify-between min-h-[600px]">
+
+        <!-- Credits HUD -->
+        <div class="absolute top-4 right-4 z-20 px-4 py-2 bg-black/50 border border-white/10 rounded-lg backdrop-blur">
+            <div class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Credits</div>
+            <div class="font-mono font-bold text-primary text-lg" id="credits-display">@ViewBag.Credits</div>
+        </div>
         
         <!-- Background Decorations -->
         <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, rgba(168,85,247,0.1) 0%, transparent 50%);"></div>
@@ -187,6 +193,11 @@
 
             document.getElementById('dealer-score').innerText = gameState.dealerHand.score;
             document.getElementById('player-score').innerText = gameState.playerHand.score;
+
+            const creditsEl = document.getElementById('credits-display');
+            if (creditsEl && typeof gameState.credits === 'number') {
+                creditsEl.innerText = gameState.credits;
+            }
 
             const msgOverlay = document.getElementById('game-message');
             if (gameState.isGameOver) {

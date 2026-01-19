@@ -22,7 +22,7 @@ public class BlackjackController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
-        if (user != null) ViewBag.Credits = user.Credits;
+        ViewBag.Credits = user?.Credits ?? 0;
         return View(new BlackjackGame()); 
     }
 
@@ -59,6 +59,8 @@ public class BlackjackController : Controller
 
         await CheckBlackjack(game, user);
         SaveGame(game);
+
+        game.Credits = user.Credits;
 
         return Json(game);
     }
@@ -135,6 +137,8 @@ public class BlackjackController : Controller
 
         game.IsGameOver = true;
         SaveGame(game);
+
+        game.Credits = user.Credits;
         return Json(game);
     }
 

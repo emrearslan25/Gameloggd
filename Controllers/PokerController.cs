@@ -28,7 +28,7 @@ public class PokerController : Controller
              game.Credits = user.Credits; 
              return View(game);
         }
-        return View(new PokerGame());
+        return View(new PokerGame { Credits = 0 });
     }
 
     [HttpPost("/poker/start")]

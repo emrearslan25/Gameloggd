@@ -22,7 +22,7 @@ public class TexasHoldemGame
     public List<Card> CommunityCards { get; set; } = new();
 
     // Chips & Bets
-    public int PlayerChips { get; set; } = 1000;
+    public int PlayerChips { get; set; } = 0;
     public int DealerChips { get; set; } = 1000;
     public int Pot { get; set; } = 0;
     public int CurrentBet { get; set; } = 0; // Amount to call for the current round leader

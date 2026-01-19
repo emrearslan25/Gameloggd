@@ -43,4 +43,5 @@ public class BlackjackGame
     public string Message { get; set; } = string.Empty;
     public string Winner { get; set; } = string.Empty; // "Player", "Dealer", "Push"
     public int BetAmount { get; set; } = 100;
+    public int Credits { get; set; } = 0;
 }

@@ -7,6 +7,8 @@ public class AdminDashboardViewModel
 {
     public required PaginatedList<Game> Games { get; set; }
     public required PaginatedList<ApplicationUser> Users { get; set; }
+    public required PaginatedList<Review> Reviews { get; set; }
+    public required PaginatedList<ReviewComment> ReviewComments { get; set; }
 
     public Game? EditingGame { get; set; }
 

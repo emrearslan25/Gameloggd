@@ -106,69 +106,104 @@
     <div class="relative z-10 flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
         <div class="layout-container flex h-full grow flex-col">
             <!-- TopNavBar -->
-            <header id="topnav" class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
-                <div class="flex items-center gap-8">
-                    <a href="/" class="flex items-center gap-4 text-primary decoration-transparent">
-                        <div class="size-6">
-                            <span class="material-symbols-outlined text-3xl">terminal</span>
-                        </div>
-                        <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">GAMELOG</h2>
-                    </a>
-                    <nav class="flex items-center gap-9 hidden md:flex">
-                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Games">Games</a>
-                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="List" asp-action="Index">Lists</a>
-                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Casino" asp-action="Index">Casino</a>
-                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Members">Members</a>
-                    </nav>
-                </div>
-                <div class="flex flex-1 justify-end gap-6 items-center">
-                    <form action="/games" method="get" class="hidden lg:flex flex-col min-w-40 !h-10 max-w-64">
-                        <div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-white/10 focus-within:border-primary transition-all">
-                            <div class="text-white/40 flex bg-white/5 items-center justify-center pl-4 rounded-l-lg border-r-0">
-                                <span class="material-symbols-outlined text-[20px]">search</span>
+            @if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+            {
+                <header id="topnav" class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
+                    <div class="flex items-center gap-4">
+                        <a href="/admin" class="flex items-center gap-4 text-primary decoration-transparent">
+                            <div class="size-6">
+                                <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
                             </div>
-                            <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-white/5 focus:border-none h-full placeholder:text-white/30 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal" placeholder="Find a game..." />
-                        </div>
-                    </form>
-                    
-                    @if (User?.Identity?.IsAuthenticated == true)
-                    {
-                        <div class="flex items-center gap-4">
-                            <!-- Profile Dropdown -->
-                            <div class="relative">
-                                <button id="profile-dropdown-trigger" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-transparent hover:border-primary/50 transition-colors focus:outline-none" 
-                                   style='background-image: url("@((User.FindFirst("ProfilePicture")?.Value) ?? $"https://ui-avatars.com/api/?name={User.Identity.Name}&background=random")");'>
-                                </button>
-                                
-                                <!-- Dropdown Menu -->
-                                <div id="profile-dropdown-menu" class="absolute right-0 top-full mt-2 w-48 bg-[#1a2e1e] backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl py-1 hidden z-[60] transform origin-top-right transition-all duration-200 opacity-0 scale-95">
-                                    <div class="px-4 py-2 border-b border-white/5 mb-1">
-                                        <p class="text-sm font-bold text-white">@User.Identity.Name</p>
-                                        <p class="text-xs text-white/50">Signed in</p>
+                            <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">ADMIN</h2>
+                        </a>
+                        <span class="text-white/30 text-xs font-bold uppercase tracking-widest">Control Deck</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <form method="post" action="/account/logout" class="block m-0 p-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_10px_rgba(13,242,51,0.3)]">
+                                Sign Out
+                            </button>
+                        </form>
+                    </div>
+                </header>
+            }
+            else
+            {
+                <header id="topnav" class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
+                    <div class="flex items-center gap-8">
+                        <a href="/" class="flex items-center gap-4 text-primary decoration-transparent">
+                            <div class="size-6">
+                                <span class="material-symbols-outlined text-3xl">terminal</span>
+                            </div>
+                            <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">GAMELOG</h2>
+                        </a>
+                        <nav class="flex items-center gap-9 hidden md:flex">
+                            <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Games">Games</a>
+                            <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="List" asp-action="Index">Lists</a>
+                            <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Casino" asp-action="Index">Casino</a>
+                            <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Members">Members</a>
+                        </nav>
+                    </div>
+                    <div class="flex flex-1 justify-end gap-6 items-center">
+                        <form action="/games" method="get" class="hidden lg:flex flex-col min-w-40 !h-10 max-w-64">
+                            <div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-white/10 focus-within:border-primary transition-all">
+                                <div class="text-white/40 flex bg-white/5 items-center justify-center pl-4 rounded-l-lg border-r-0">
+                                    <span class="material-symbols-outlined text-[20px]">search</span>
+                                </div>
+                                <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-white/5 focus:border-none h-full placeholder:text-white/30 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal" placeholder="Find a game..." />
+                            </div>
+                        </form>
+                        
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="flex items-center gap-4">
+                                <!-- Profile Dropdown -->
+                                <div class="relative">
+                                    <button id="profile-dropdown-trigger" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-transparent hover:border-primary/50 transition-colors focus:outline-none" 
+                                       style='background-image: url("@((User.FindFirst("ProfilePicture")?.Value) ?? $"https://ui-avatars.com/api/?name={User.Identity.Name}&background=random")");'>
+                                    </button>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div id="profile-dropdown-menu" class="absolute right-0 top-full mt-2 w-48 bg-[#1a2e1e] backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl py-1 hidden z-[60] transform origin-top-right transition-all duration-200 opacity-0 scale-95">
+                                        <div class="px-4 py-2 border-b border-white/5 mb-1">
+                                            <p class="text-sm font-bold text-white">@User.Identity.Name</p>
+                                            <p class="text-xs text-white/50">Signed in</p>
+                                        </div>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a href="/admin" class="flex items-center gap-2 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined text-base">admin_panel_settings</span>
+                                                Admin Panel
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="/user/@(Uri.EscapeDataString(User.Identity.Name!))" class="flex items-center gap-2 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined text-base">person</span>
+                                                Profile
+                                            </a>
+                                        }
+                                        <form method="post" action="/account/logout" class="block m-0 p-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-white/80 hover:bg-red-500/10 hover:text-red-400 transition-colors">
+                                                <span class="material-symbols-outlined text-base">logout</span>
+                                                Sign Out
+                                            </button>
+                                        </form>
                                     </div>
-                                    <a href="/user/@(Uri.EscapeDataString(User.Identity.Name!))" class="flex items-center gap-2 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-base">person</span>
-                                        Profile
-                                    </a>
-                                    <form method="post" action="/account/logout" class="block m-0 p-0">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="w-full flex items-center gap-2 text-left px-4 py-2 text-sm text-white/80 hover:bg-red-500/10 hover:text-red-400 transition-colors">
-                                            <span class="material-symbols-outlined text-base">logout</span>
-                                            Sign Out
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <a href="/account" class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_10px_rgba(13,242,51,0.3)]">
-                            Sign In
-                        </a>
-                    }
-                </div>
-            </header>
+                        }
+                        else
+                        {
+                            <a href="/account" class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_10px_rgba(13,242,51,0.3)]">
+                                Sign In
+                            </a>
+                        }
+                    </div>
+                </header>
+            }
 
             <main class="flex-grow">
                  @if (TempData["StatusMessage"] != null)
@@ -211,8 +246,11 @@
     </div>
     
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <partial name="_ChatBox" />
-    <partial name="_ChatSidebar" />
+    @if (!(User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin")))
+    {
+        <partial name="_ChatBox" />
+        <partial name="_ChatSidebar" />
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

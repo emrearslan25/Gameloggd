@@ -32,7 +32,7 @@ public class PokerGame
     public bool IsGameOver { get; set; }
     public bool CanDraw { get; set; } // True after deal, False after draw
     public string Message { get; set; } = string.Empty;
-    public int Credits { get; set; } = 100; // Starting credits
+    public int Credits { get; set; } = 0;
     public int Bet { get; set; } = 1;
 }
 

@@ -40,9 +40,9 @@
                 <!-- Dealer Cards -->
             </div>
 
-            <div class="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg border border-white/5">
-                <span class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Chips</span>
-                <span class="font-mono font-bold text-white text-sm" id="dealer-chips">1000</span>
+            <div class="px-4 py-2 bg-black/50 border border-white/10 rounded-lg backdrop-blur text-center">
+                <div class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Chips</div>
+                <div class="font-mono font-bold text-white text-lg" id="dealer-chips">@Model.DealerChips</div>
             </div>
         </div>
 
@@ -72,9 +72,9 @@
 
             <div class="w-full flex items-center justify-between px-4 md:px-12">
                 <div class="flex flex-col items-center">
-                    <div class="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg border border-white/5 mb-2">
-                        <span class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Chips</span>
-                        <span class="font-mono font-bold text-accent-cyan text-sm" id="player-chips">1000</span>
+                    <div class="px-4 py-2 bg-black/50 border border-white/10 rounded-lg backdrop-blur text-center mb-2">
+                        <div class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Credits</div>
+                        <div class="font-mono font-bold text-primary text-lg" id="player-chips">@Model.PlayerChips</div>
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan text-xs font-bold uppercase tracking-widest">
                         You
