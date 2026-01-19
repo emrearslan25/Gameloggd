@@ -2,64 +2,76 @@ using Microsoft.AspNetCore.Mvc;
 using GameLoggd.Models.Games;
 using GameLoggd.Models.Poker;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using GameLoggd.Models;
 
 namespace GameLoggd.Controllers;
 
 public class PokerController : Controller
 {
     private const string SessionKey = "PokerGame";
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public PokerController(UserManager<ApplicationUser> userManager)
+    {
+        _userManager = userManager;
+    }
 
     [HttpGet("/poker")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if(user != null) 
+        {
+             // Pass credits to view for initial load
+             var game = new PokerGame();
+             game.Credits = user.Credits; 
+             return View(game);
+        }
         return View(new PokerGame());
     }
 
     [HttpPost("/poker/start")]
-    public IActionResult Start([FromBody] int bet)
+    public async Task<IActionResult> Start([FromBody] int bet)
     {
-        // Load existing game to preserve credits, or new game
-        var oldGame = LoadGame();
-        var game = new PokerGame();
-        
-        if (oldGame != null)
-        {
-            game.Credits = oldGame.Credits;
-        }
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
 
         if (bet < 1) bet = 1;
-        if (bet > 5) bet = 5; // Max bet
+        if (bet > 5) bet = 5; 
 
-        if (game.Credits < bet)
+        if (user.Credits < bet)
         {
              return BadRequest("Not enough credits");
         }
 
+        user.Credits -= bet;
+        await _userManager.UpdateAsync(user);
+
+        var game = new PokerGame();
+        game.Credits = user.Credits; // Sync for response
         game.Bet = bet;
-        game.Credits -= bet;
         game.Deck = CreateDeck();
         Shuffle(game.Deck);
 
-        // Deal 5 cards
         for (int i = 0; i < 5; i++)
         {
             game.Hand.Add(DrawCard(game.Deck));
         }
 
         game.CanDraw = true;
-        
-        // Initial Eval just for display (optional, usu. not shown until end or shown as "potential")
-        // But in Video Poker we usually don't show rank until end unless it's a made hand
-        
         SaveGame(game);
         return Json(game);
     }
 
     [HttpPost("/poker/draw")]
-    public IActionResult Draw([FromBody] List<bool> heldIndices)
+    public async Task<IActionResult> Draw([FromBody] List<bool> heldIndices)
     {
         var game = LoadGame();
         if (game == null || !game.CanDraw) return BadRequest("Game not active or draw already made");
+        
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
 
         if (heldIndices == null || heldIndices.Count != 5) 
             heldIndices = new List<bool> { false, false, false, false, false };
@@ -78,7 +90,13 @@ public class PokerController : Controller
         var result = HandEvaluator.Evaluate(game.Hand);
         int payout = result.Payout * game.Bet;
         
-        game.Credits += payout;
+        if (payout > 0)
+        {
+            user.Credits += payout;
+            await _userManager.UpdateAsync(user);
+        }
+        
+        game.Credits = user.Credits; // Sync for response
         game.Message = payout > 0 ? $"{result.Rank}! You won {payout} credits." : "Game Over";
         
         game.CanDraw = false;

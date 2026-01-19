@@ -4,284 +4,90 @@
     ViewData["Title"] = "Blackjack";
 }
 
-<style>
-    .blackjack-table {
-        background-color: #050505;
-        background-image: 
-            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-        background-size: 30px 30px;
-        border-radius: 1rem;
-        border: 2px solid var(--neon-purple);
-        box-shadow: 0 0 20px rgba(188, 19, 254, 0.3), inset 0 0 50px rgba(0,0,0,0.8);
-        padding: 2rem;
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        font-family: 'Courier New', monospace;
-    }
-
-    .dealer-area,.player-area {
-        text-align: center;
-    }
-
-    .area-label {
-        font-size: 1.5rem;
-        color: var(--neon-cyan);
-        text-transform: uppercase;
-        margin-bottom: 1rem;
-        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-        letter-spacing: 2px;
-    }
-
-    .cards-container {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        min-height: 140px;
-        perspective: 1000px;
-    }
-
-    .bj-card {
-        width: 100px;
-        height: 140px;
-        background: #111;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        position: relative;
-        transition: transform 0.3s ease, margin-top 0.3s;
-        border: 2px solid #333;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    }
-
-    .bj-card.red { 
-        color: #ff0055; /* Neon Pink */
-        border-color: #ff0055;
-        box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
-    }
+<div class="w-full min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center">
     
-    .bj-card.black { 
-        color: #00e5ff; /* Neon Cyan */
-        border-color: #00e5ff;
-        box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
-    }
+    <!-- Game Logo -->
+    <div class="mb-8 text-center space-y-2 animate-slide-in-up">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-purple/20 border border-accent-purple/50 text-4xl mb-4 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+            ♠️
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black font-display text-white tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+            Blackjack
+        </h1>
+        <p class="text-accent-purple/70 font-mono text-sm tracking-widest uppercase">Beat the Dealer • Pays 3:2</p>
+    </div>
 
-    .bj-card .corner-top {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        font-size: 1rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+    <!-- Game Table -->
+    <div class="w-full max-w-4xl bg-[#050505] border border-accent-purple/30 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-[0_0_50px_rgba(168,85,247,0.15)] flex flex-col justify-between min-h-[600px]">
+        
+        <!-- Background Decorations -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, rgba(168,85,247,0.1) 0%, transparent 50%);"></div>
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-purple to-transparent opacity-50"></div>
 
-    .bj-card .corner-bottom {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-        font-size: 1rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transform: rotate(180deg);
-    }
-    
-    .bj-card .center-suit {
-        font-size: 3rem;
-        filter: drop-shadow(0 0 5px currentColor);
-    }
-
-    .bj-card.hidden {
-        background: repeating-linear-gradient(
-            45deg,
-            #1a1a1a,
-            #1a1a1a 10px,
-            #222 10px,
-            #222 20px
-        );
-        border: 2px solid #555;
-        color: #555;
-        box-shadow: none;
-    }
-    
-    .bj-card.hidden .center-suit {
-        color: #333;
-        text-shadow: 0 0 5px rgba(255,255,255,0.1);
-    }
-
-    .score-badge {
-        display: inline-block;
-        background: #000;
-        color: #fff;
-        padding: 5px 20px;
-        border-radius: 4px;
-        font-size: 1.2rem;
-        margin-top: 15px;
-        border: 1px solid var(--neon-purple);
-        box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
-        text-shadow: 0 0 5px var(--neon-purple);
-    }
-
-    .controls {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        margin-top: 2rem;
-    }
-
-    .bj-btn {
-        padding: 1rem 3rem;
-        font-size: 1.1rem;
-        font-family: inherit;
-        text-transform: uppercase;
-        cursor: pointer;
-        border: none;
-        transition: all 0.2s;
-        font-weight: bold;
-        border-radius: 4px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .bj-btn:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.2);
-    }
-
-    .bj-btn:active {
-        transform: translateY(1px);
-    }
-
-    .btn-hit { 
-        background: transparent;
-        border: 2px solid #ffeb3b;
-        color: #ffeb3b;
-        box-shadow: 0 0 10px rgba(255, 235, 59, 0.2);
-    }
-    
-    .btn-stand { 
-        background: transparent;
-        border: 2px solid #ff0055;
-        color: #ff0055;
-        box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
-    }
-    
-    .btn-start { 
-        background: var(--neon-cyan); 
-        color: black; 
-        font-weight: 800;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-        border: none;
-    }
-
-    .btn-restart { 
-        background: transparent;
-        border: 2px solid #00ff88;
-        color: #00ff88;
-        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
-    }
-
-    .message-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(10, 10, 10, 0.95);
-        backdrop-filter: blur(10px);
-        color: white;
-        padding: 3rem;
-        border-radius: 1rem;
-        text-align: center;
-        display: none;
-        z-index: 100;
-        border: 2px solid var(--neon-purple);
-        box-shadow: 0 0 50px rgba(188, 19, 254, 0.3);
-        min-width: 300px;
-    }
-
-    .message-overlay h2 {
-        font-size: 2.5rem;
-        margin-bottom: 2rem;
-        color: #fff;
-        text-shadow: 0 0 10px rgba(255,255,255,0.5);
-    }
-
-    /* ANIMATIONS */
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(100px) rotate(10deg);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0) rotate(0);
-        }
-    }
-
-    @@keyframes popIn {
-        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-        70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-
-    @@keyframes neonPulse {
-        0% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de; }
-        50% { box-shadow: 0 0 2px #fff, 0 0 5px #fff, 0 0 10px #ff00de, 0 0 15px #ff00de; }
-        100% { box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de; }
-    }
-
-    .bj-card.animate-enter {
-        animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-
-    .message-overlay.show {
-        display: block;
-        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    
-    .message-overlay.show h2 {
-        animation: neonPulse 1.5s infinite alternate;
-    }
-</style>
-
-<div class="page-container">
-    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Blackjack</h1>
-
-    <div class="blackjack-table">
-        <div class="dealer-area">
-            <div class="area-label">Dealer</div>
-            <div class="cards-container" id="dealer-cards">
-                <!-- Cards injected here -->
+        <!-- Dealer Area -->
+        <div class="text-center relative z-10 space-y-4">
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent-purple/10 border border-accent-purple/20 text-accent-purple text-xs font-bold uppercase tracking-widest">
+                Dealer
             </div>
-            <div class="score-badge" id="dealer-score">0</div>
+            
+            <div class="flex justify-center gap-4 min-h-[160px] perspective-[1000px]" id="dealer-cards">
+                <!-- Dealer Cards Injected Here -->
+            </div>
+
+            <div class="inline-block">
+                <div class="px-4 py-1 rounded bg-black border border-white/10 text-white font-mono font-bold text-lg min-w-[3rem]" id="dealer-score">0</div>
+            </div>
         </div>
 
-        <div class="message-overlay" id="game-message">
-            <h2 id="result-text">YOU WIN!</h2>
-            <button class="bj-btn btn-restart" onclick="startGame()">PLAY AGAIN</button>
+        <!-- Message Overlay -->
+        <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden" id="game-message">
+            <div class="text-center space-y-6 animate-zoom-in">
+                <h2 class="text-5xl md:text-7xl font-black font-display text-white tracking-tighter italic drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]" id="result-text">
+                    YOU WIN!
+                </h2>
+                <div class="pt-4">
+                    <button class="px-8 py-4 bg-primary text-black font-black uppercase tracking-widest rounded-xl hover:scale-105 hover:shadow-[0_0_30px_rgba(13,242,51,0.4)] transition-all flex items-center gap-2 mx-auto" onclick="startGame()">
+                        <span class="material-symbols-outlined">replay</span>
+                        Play Again
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="player-area">
-            <div class="area-label">You</div>
-            <div class="cards-container" id="player-cards">
-                <!-- Cards injected here -->
+        <!-- Player Area -->
+        <div class="text-center relative z-10 space-y-4 mt-auto">
+            <div class="inline-block">
+                <div class="px-4 py-1 rounded bg-black border border-white/10 text-white font-mono font-bold text-lg min-w-[3rem]" id="player-score">0</div>
             </div>
-            <div class="score-badge" id="player-score">0</div>
 
-            <div class="controls" id="game-controls" style="display: none;">
-                <button class="bj-btn btn-hit" onclick="hit()">HIT</button>
-                <button class="bj-btn btn-stand" onclick="stand()">STAND</button>
+            <div class="flex justify-center gap-4 min-h-[160px] perspective-[1000px]" id="player-cards">
+                <!-- Player Cards Injected Here -->
             </div>
-            <div class="controls" id="start-controls">
-                <button class="bj-btn btn-start" onclick="startGame()">DEAL CARDS</button>
+
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan text-xs font-bold uppercase tracking-widest">
+                You
+            </div>
+
+            <!-- Controls -->
+            <div class="h-20 flex items-center justify-center">
+                
+                <!-- In-Game Controls -->
+                <div id="game-controls" class="hidden flex gap-4">
+                    <button class="px-8 py-3 bg-transparent border-2 border-yellow-400 text-yellow-400 font-bold uppercase tracking-widest rounded-xl hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(250,204,21,0.4)] transition-all transform active:scale-95" onclick="hit()">
+                        Hit
+                    </button>
+                    <button class="px-8 py-3 bg-transparent border-2 border-red-500 text-red-500 font-bold uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform active:scale-95" onclick="stand()">
+                        Stand
+                    </button>
+                </div>
+
+                <!-- Start Controls -->
+                <div id="start-controls">
+                    <button class="px-12 py-4 bg-accent-cyan text-black font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all flex items-center gap-2" onclick="startGame()">
+                        <span class="material-symbols-outlined">playing_cards</span>
+                        Deal Cards
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -289,22 +95,38 @@
 
 @section Scripts {
     <script>
-        // Store previous state to detect new cards for animation
         let prevPlayerCardCount = 0;
         let prevDealerCardCount = 0;
 
-        function createCardHtml(card, index, isNew) {
-            const animationClass = isNew ? 'animate-enter' : '';
-            const styleDelay = isNew ? `animation-delay: ${index * 100}ms` : '';
+        function getCardSignature(card) {
+            if (card.isHidden) return 'hidden';
+            return `${card.rank}-${card.suit}`;
+        }
+
+        function createCardHtml(card, index, animationType) {
+            // animationType: 'deal' | 'flip' | 'none'
+            let animClass = '';
+            let style = '';
+            
+            if (animationType === 'deal') {
+                animClass = 'animate-slide-in-right opacity-0'; // Add opacity-0 start for keyframe
+                style = `animation-delay: ${index * 150}ms; animation-fill-mode: forwards;`;
+            } else if (animationType === 'flip') {
+                animClass = 'animate-flip-in-y';
+            }
+
+            const cardSig = getCardSignature(card);
 
             if (card.isHidden) {
-                return `<div class="bj-card hidden ${animationClass}" style="${styleDelay}">
-                            <div class="center-suit">?</div>
+                return `<div class="w-24 h-36 md:w-28 md:h-40 bg-[#1a1a1a] rounded-xl border-2 border-white/10 flex items-center justify-center shadow-xl relative overflow-hidden ${animClass}" style="${style}" data-card-sig="${cardSig}">
+                            <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:250%_250%] animate-pulse"></div>
+                            <div class="text-4xl text-white/20 font-display">?</div>
                         </div>`;
             }
 
-            const isRed = card.suit === 0 || card.suit === 1; // Hearts(0), Diamonds(1)
-            const colorClass = isRed ? 'red' : 'black';
+            const isRed = card.suit === 0 || card.suit === 1; 
+            const colorClass = isRed ? 'text-red-500 border-red-500/30' : 'text-accent-cyan border-accent-cyan/30';
+            const shadowClass = isRed ? 'shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'shadow-[0_0_15px_rgba(34,211,238,0.15)]';
             
             const suits = ['♥', '♦', '♣', '♠'];
             const suitSymbol = suits[card.suit];
@@ -315,65 +137,83 @@
             else if (card.rank === 13) rankStr = 'K';
             else if (card.rank === 14) rankStr = 'A';
 
-            return `<div class="bj-card ${colorClass} ${animationClass}" style="${styleDelay}">
-                        <div class="corner-top">
+            return `<div class="w-24 h-36 md:w-28 md:h-40 bg-[#151515] rounded-xl border-2 flex flex-col items-center justify-center relative ${colorClass} ${shadowClass} ${animClass} transform hover:-translate-y-2 transition-transform duration-300" style="${style}" data-card-sig="${cardSig}">
+                        <div class="absolute top-2 left-2 flex flex-col items-center text-sm font-bold leading-none">
                             <span>${rankStr}</span>
                             <span>${suitSymbol}</span>
                         </div>
-                        <div class="center-suit">${suitSymbol}</div>
-                        <div class="corner-bottom">
+                        <div class="text-5xl drop-shadow-md">${suitSymbol}</div>
+                        <div class="absolute bottom-2 right-2 flex flex-col items-center text-sm font-bold leading-none rotate-180">
                             <span>${rankStr}</span>
                             <span>${suitSymbol}</span>
                         </div>
                     </div>`;
         }
 
-        function updateBoard(gameState) {
-            const dealerContainer = document.getElementById('dealer-cards');
-            const playerContainer = document.getElementById('player-cards');
+        function renderHand(containerId, cards) {
+            const container = document.getElementById(containerId);
             
-            // Render Dealer Cards
-            // Smarter approach: Check diff
-            const dealerHtml = gameState.dealerHand.cards.map((c, i) => createCardHtml(c, i, i >= prevDealerCardCount)).join('');
-            const playerHtml = gameState.playerHand.cards.map((c, i) => createCardHtml(c, i, i >= prevPlayerCardCount)).join('');
-
-            dealerContainer.innerHTML = dealerHtml;
-            playerContainer.innerHTML = playerHtml;
-
-            // Update counts for next turn
-            prevDealerCardCount = gameState.dealerHand.cards.length;
-            prevPlayerCardCount = gameState.playerHand.cards.length;
-
-            if (prevDealerCardCount === 0 && prevPlayerCardCount === 0) {
-                 // Reset happened
+            // 1. Remove excess
+            while (container.children.length > cards.length) {
+                container.removeChild(container.lastChild);
             }
 
-            // Update Scores
+            // 2. Update or Append
+            cards.forEach((card, index) => {
+                const el = container.children[index];
+                const newSig = getCardSignature(card);
+                
+                if (!el) {
+                    // New Card -> Append with Deal animation
+                    const temp = document.createElement('div');
+                    temp.innerHTML = createCardHtml(card, index, 'deal');
+                    container.appendChild(temp.firstElementChild);
+                } else {
+                    const currentSig = el.getAttribute('data-card-sig');
+                    if (currentSig !== newSig) {
+                        // Changed Card (e.g. Flip) -> Replace with Flip animation
+                        const temp = document.createElement('div');
+                        temp.innerHTML = createCardHtml(card, index, 'flip');
+                        container.replaceChild(temp.firstElementChild, el);
+                    }
+                    // Else: Same card, do nothing (preserves DOM/animations state)
+                }
+            });
+        }
+
+        function updateBoard(gameState) {
+            renderHand('dealer-cards', gameState.dealerHand.cards);
+            renderHand('player-cards', gameState.playerHand.cards);
+
             document.getElementById('dealer-score').innerText = gameState.dealerHand.score;
             document.getElementById('player-score').innerText = gameState.playerHand.score;
 
-            // Update Controls & Message
             const msgOverlay = document.getElementById('game-message');
             if (gameState.isGameOver) {
-                document.getElementById('game-controls').style.display = 'none';
-                document.getElementById('start-controls').style.display = 'none';
+                // Smooth fade out of controls
+                document.getElementById('game-controls').classList.add('hidden');
+                document.getElementById('start-controls').classList.add('hidden');
                 
-                document.getElementById('result-text').innerText = gameState.message;
-                msgOverlay.classList.add('show');
-                // Ensure overlay is display block
-                msgOverlay.style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('result-text').innerText = gameState.message;
+                    msgOverlay.classList.remove('hidden');
+                    msgOverlay.classList.add('flex');
+                }, 1500);
             } else {
-                document.getElementById('game-controls').style.display = 'flex';
-                document.getElementById('start-controls').style.display = 'none';
-                msgOverlay.classList.remove('show');
-                msgOverlay.style.display = 'none'; 
+                document.getElementById('game-controls').classList.remove('hidden');
+                document.getElementById('start-controls').classList.add('hidden');
+                msgOverlay.classList.add('hidden');
+                msgOverlay.classList.remove('flex');
             }
         }
 
         async function startGame() {
-            // Reset counts so deal animations trigger
-            prevPlayerCardCount = 0;
-            prevDealerCardCount = 0;
+            // Clear board visuals first for a clean new deal feeling? 
+            // Or let renderHand handle it (it will remove excess). 
+            // Usually simpler to just clear for a fresh "Deal" animation sequence.
+            document.getElementById('dealer-cards').innerHTML = '';
+            document.getElementById('player-cards').innerHTML = '';
+            
             try {
                 const response = await fetch('/blackjack/start', { 
                     method: 'POST',

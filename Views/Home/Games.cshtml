@@ -3,56 +3,79 @@
     ViewData["Title"] = "Games";
 }
 
-<div class="page-container" style="padding: 2rem 1.5rem;">
+<div class="page-container py-8 px-6 max-w-[1400px] mx-auto">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; text-shadow: 0 0 20px rgba(0,0,0,0.5);">Browse Games</h1>
-        <div style="font-size: 1rem; color: var(--text-secondary);">@Model.Games.Count games found</div>
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">Browse Games</h1>
+        <div class="px-4 py-2 bg-white/5 rounded-full border border-white/10 text-primary font-mono text-sm font-bold">
+            @Model.Games.Count titles found
+        </div>
     </div>
 
     <!-- FILTERS -->
-    <form method="get" action="/games" style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+    <form method="get" action="/games" class="bg-black/20 backdrop-blur-md border border-white/10 p-6 rounded-2xl mb-10 flex flex-col lg:flex-row gap-4 lg:items-end shadow-xl">
         
-        <div style="flex: 1; min-width: 200px;">
-            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Search</label>
-            <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search titles..." style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;" />
+        <div class="flex-1 min-w-[250px]">
+            <label class="block text-white/40 text-xs font-bold uppercase tracking-wider mb-2">Search</label>
+            <div class="relative group">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-primary transition-colors">search</span>
+                <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search titles..." 
+                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none font-mono text-sm" />
+            </div>
         </div>
 
-        <div style="flex: 1; min-width: 200px;">
-            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Genre</label>
-            <select name="genre" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
-                <option value="">All Genres</option>
-                @foreach(var g in Model.AvailableGenres)
-                {
-                    <!option value="@g.Slug" @(Model.SelectedGenre == g.Slug ? "selected" : "")>@g.Name</!option>
-                }
-            </select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-1 gap-4">
+            <div class="flex-1">
+                <label class="block text-white/40 text-xs font-bold uppercase tracking-wider mb-2">Genre</label>
+                <div class="relative">
+                    <select name="genre" class="w-full appearance-none bg-white/5 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-white focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none text-sm cursor-pointer">
+                        <option value="" class="bg-background-dark text-white/60">All Genres</option>
+                        @foreach(var g in Model.AvailableGenres)
+                        {
+                            <!option value="@g.Slug" class="bg-background-dark" @(Model.SelectedGenre == g.Slug ? "selected" : "")>@g.Name</!option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-2.5 text-white/20 pointer-events-none">expand_more</span>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <label class="block text-white/40 text-xs font-bold uppercase tracking-wider mb-2">Platform</label>
+                <div class="relative">
+                     <select name="platform" class="w-full appearance-none bg-white/5 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-white focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none text-sm cursor-pointer">
+                        <option value="" class="bg-background-dark text-white/60">All Platforms</option>
+                        @foreach(var p in Model.AvailablePlatforms)
+                        {
+                             <!option value="@p.Slug" class="bg-background-dark" @(Model.SelectedPlatform == p.Slug ? "selected" : "")>@p.Name</!option>
+                        }
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-2.5 text-white/20 pointer-events-none">expand_more</span>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <label class="block text-white/40 text-xs font-bold uppercase tracking-wider mb-2">Sort</label>
+                <div class="relative">
+                    <select name="sort" class="w-full appearance-none bg-white/5 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-white focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none text-sm cursor-pointer">
+                        <!option value="newest" class="bg-background-dark" @(Model.SelectedSort == "newest" ? "selected" : "")>Newest Added</!option>
+                        <!option value="oldest" class="bg-background-dark" @(Model.SelectedSort == "oldest" ? "selected" : "")>Oldest Added</!option>
+                        <!option value="year_desc" class="bg-background-dark" @(Model.SelectedSort == "year_desc" ? "selected" : "")>Release Year (Newest)</!option>
+                        <!option value="year_asc" class="bg-background-dark" @(Model.SelectedSort == "year_asc" ? "selected" : "")>Release Year (Oldest)</!option>
+                        <!option value="title" class="bg-background-dark" @(Model.SelectedSort == "title" ? "selected" : "")>Title (A-Z)</!option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-2.5 text-white/20 pointer-events-none">sort</span>
+                </div>
+            </div>
         </div>
 
-        <div style="flex: 1; min-width: 200px;">
-            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Platform</label>
-            <select name="platform" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
-                <option value="">All Platforms</option>
-                @foreach(var p in Model.AvailablePlatforms)
-                {
-                    <!option value="@p.Slug" @(Model.SelectedPlatform == p.Slug ? "selected" : "")>@p.Name</!option>
-                }
-            </select>
+        <div class="flex items-center gap-3 mt-4 lg:mt-0">
+            <button type="submit" class="h-[42px] px-6 bg-primary text-background-dark font-bold uppercase tracking-widest rounded-lg hover:bg-white hover:text-black transition-all shadow-[0_0_15px_rgba(13,242,51,0.2)] hover:shadow-[0_0_20px_rgba(13,242,51,0.4)]">
+                Filter
+            </button>
+            <a href="/games" class="h-[42px] px-4 flex items-center justify-center border border-white/10 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors text-sm font-bold uppercase tracking-wider">
+                Clear
+            </a>
         </div>
-
-        <div style="flex: 1; min-width: 200px;">
-            <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Sort By</label>
-            <select name="sort" style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.6rem; border-radius: 6px;">
-                 <!option value="newest" @(Model.SelectedSort == "newest" ? "selected" : "")>Newest Added</!option>
-                 <!option value="oldest" @(Model.SelectedSort == "oldest" ? "selected" : "")>Oldest Added</!option>
-                 <!option value="year_desc" @(Model.SelectedSort == "year_desc" ? "selected" : "")>Release Year (Newest)</!option>
-                 <!option value="year_asc" @(Model.SelectedSort == "year_asc" ? "selected" : "")>Release Year (Oldest)</!option>
-                 <!option value="title" @(Model.SelectedSort == "title" ? "selected" : "")>Title (A-Z)</!option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn-primary" style="padding: 0.6rem 1.5rem; height: 42px;">Filter</button>
-        <a href="/games" style="color: var(--text-secondary); text-decoration: underline; font-size: 0.9rem; padding-bottom: 0.7rem;">Clear</a>
     </form>
 
     <!-- GRID -->
@@ -62,9 +85,10 @@
     }
     else
     {
-        <div style="text-align: center; padding: 6rem; color: var(--text-secondary); background: var(--bg-card); border-radius: 1rem; border: 1px dashed var(--border-color);">
-            <p style="margin-bottom: 1rem; font-size: 1.1rem;">No games found matching your filters.</p>
-            <a href="/games" style="color: var(--neon-cyan); font-weight: 500;">Clear filters and try again →</a>
+        <div class="flex flex-col items-center justify-center py-20 bg-white/5 border border-white/10 border-dashed rounded-2xl">
+            <span class="material-symbols-outlined text-4xl text-white/20 mb-4">search_off</span>
+            <p class="text-white/40 text-lg font-medium mb-4">No games found matching your filters.</p>
+            <a href="/games" class="text-primary hover:text-white font-bold underline decoration-primary/30 hover:decoration-white transition-colors">Clear filters and try again</a>
         </div>
     }
 

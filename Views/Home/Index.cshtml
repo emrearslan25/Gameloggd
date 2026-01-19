@@ -3,153 +3,192 @@
     ViewData["Title"] = "Home";
 }
 
-<!-- Hero Section -->
-<section class="hero-section">
-    @if (Model.HeroGame != null)
-    {
-        <div class="hero-background">
-            @if (!string.IsNullOrEmpty(Model.HeroGame.ImagePath))
-            {
-                <img src="@Model.HeroGame.ImagePath" alt="@Model.HeroGame.Title" class="hero-image" />
-            }
-            else
-            {
-                 <div class="hero-image" style="background: linear-gradient(45deg, #1a1a1a, #2a2a2a);"></div>
-            }
-            <div class="hero-overlay"></div>
-        </div>
-
-        <div class="hero-content">
-            <div class="hero-text">
-                <div class="trending-badge">
-                    <span>Latest Addition</span>
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 px-4 md:px-10 mx-auto w-full">
+    <!-- HeroSection -->
+    <div class="@@container mb-12 mt-8">
+        @if (Model.HeroGame != null)
+        {
+            <div class="flex flex-col gap-8 py-10 @@[864px]:flex-row items-center">
+                <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl @@[864px]:w-1/2 border-2 border-white/5 relative overflow-hidden group" 
+                     style='background-image: url("@(string.IsNullOrEmpty(Model.HeroGame.ImagePath) ? "/images/placeholder_game.jpg" : Model.HeroGame.ImagePath)");'>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent"></div>
                 </div>
-                <h2>@Model.HeroGame.Title</h2>
-                <p>
-                    @(string.IsNullOrWhiteSpace(Model.HeroGame.Description) 
-                        ? "No description available." 
-                        : (Model.HeroGame.Description.Length > 150 
-                            ? Model.HeroGame.Description.Substring(0, 150) + "..." 
-                            : Model.HeroGame.Description))
-                </p>
-                <a href="/game/@Model.HeroGame.Slug" class="btn-primary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Log this game
-                </a>
+                <div class="flex flex-col gap-8 @@[864px]:w-1/2">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex gap-2">
+                             @if (DateTime.Now.Year == Model.HeroGame.Year)
+                             {
+                                <span class="px-2 py-1 bg-accent-purple/20 text-accent-purple text-[10px] font-bold uppercase tracking-tighter rounded border border-accent-purple/30">New Release</span>
+                             }
+                            <span class="px-2 py-1 bg-accent-cyan/20 text-accent-cyan text-[10px] font-bold uppercase tracking-tighter rounded border border-accent-cyan/30">Featured</span>
+                        </div>
+                        <h1 class="text-white text-5xl font-black leading-[0.9] tracking-tighter uppercase @@[480px]:text-7xl">
+                            @Model.HeroGame.Title
+                        </h1>
+                        <p class="text-white/60 text-base max-w-md line-clamp-3">
+                            @(string.IsNullOrWhiteSpace(Model.HeroGame.Description) 
+                                ? "No description available." 
+                                : Model.HeroGame.Description)
+                        </p>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="/game/@Model.HeroGame.Slug" class="flex flex-1 max-w-[240px] cursor-pointer items-center justify-center rounded-lg h-14 px-6 bg-primary text-black text-lg font-black tracking-wider uppercase hover:scale-105 transition-transform no-underline">
+                            LOG THIS GAME
+                        </a>
+                        <!-- Add to list button placeholder if needed -->
+                    </div>
+                </div>
             </div>
-        </div>
-    }
-    else
-    {
-        <div class="hero-background">
-            <div class="hero-overlay"></div>
-        </div>
-        <div class="hero-content">
-            <div class="hero-text">
-                <h2>Welcome to GameLoggd</h2>
-                <p>Start your collection by adding games in the admin panel.</p>
+        }
+        else
+        {
+             <div class="py-20 text-center">
+                <h1 class="text-white text-5xl font-black uppercase mb-4">Welcome to GameLog</h1>
+                <p class="text-white/60">Start logging your gaming journey today.</p>
             </div>
-        </div>
-    }
-</section>
+        }
+    </div>
 
-<!-- Popular Games -->
-<section class="popular-section">
-    <div class="section-container">
-        <div class="section-header">
-            <h2>Recent Games</h2>
-            <!-- Scroll controls could be added here if JS implemented -->
-        </div>
+    <!-- Trending Section Header -->
+    <div class="flex items-center justify-between px-2 mb-2">
+        <h2 class="text-white text-2xl font-bold tracking-tighter uppercase flex items-center gap-2">
+            <span class="w-8 h-1 bg-primary rounded-full"></span>
+            Trending Games
+        </h2>
+        <a class="text-primary text-sm font-bold hover:underline" href="/games">View All</a>
+    </div>
 
-        <div class="games-scroll">
+    <!-- Carousel -->
+    <div class="mb-16">
+        <div class="flex overflow-x-auto no-scrollbar gap-5 py-4 pb-8">
             @if (Model.PopularGames.Any())
             {
                 foreach (var game in Model.PopularGames)
                 {
-                    <a class="game-card" href="/game/@game.Slug">
-                        <div class="game-cover">
-                             @if (!string.IsNullOrEmpty(game.ImagePath))
-                            {
-                                <img src="@game.ImagePath" alt="@game.Title" />
-                            }
-                            else
-                            {
-                                <div style="width:100%; height:100%; background: #333; display:flex; align-items:center; justify-content:center; color:#777;">
-                                    No Image
-                                </div>
-                            }
-                            <div class="game-overlay">
-                                <!-- Optional rating overlay -->
-                            </div>
+                    <a href="/game/@game.Slug" class="group flex h-full flex-col gap-3 min-w-[200px] max-w-[200px] cursor-pointer decoration-transparent">
+                        <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg border-2 border-transparent transition-all group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(13,242,51,0.2)]" 
+                             style='background-image: url("@(string.IsNullOrEmpty(game.ImagePath) ? "/images/placeholder_game.jpg" : game.ImagePath)");'></div>
+                        <div>
+                            <p class="text-white text-base font-bold group-hover:text-primary transition-colors truncate">@game.Title</p>
+                            <p class="text-white/40 text-xs font-medium uppercase tracking-widest">@game.Year</p>
                         </div>
-                        <h3>@game.Title</h3>
                     </a>
                 }
             }
             else
             {
-                <p style="color: #888; padding: 2rem;">No games found.</p>
+                <div class="text-white/40 italic">No trending games found.</div>
             }
         </div>
     </div>
-</section>
 
-<section class="reviews-section">
-    <div class="section-container">
-        <div class="section-header">
-            <h2>Activity Feed</h2>
-        </div>
+    <!-- Feed Header -->
+    <div class="flex items-center gap-3 px-2 mb-6">
+        <span class="material-symbols-outlined text-primary">sensors</span>
+        <h2 class="text-white text-2xl font-bold tracking-tighter uppercase">Live From the Community</h2>
+    </div>
 
-        <div class="reviews-list">
-            @foreach (var activity in Model.Activities)
+    <!-- Global Activity Feed -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+        <div class="lg:col-span-2 space-y-4">
+            @if (Model.Activities.Any())
             {
-                <div class="review-card">
-                    <div class="review-avatar avatar-cyan">
-                        @(activity.User?.UserName?.Substring(0,1).ToUpper() ?? "?")
+                foreach (var activity in Model.Activities)
+                {
+                    <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:bg-white/10 transition-colors">
+                        <div class="flex items-start gap-4">
+                            <a href="/user/@activity.User?.UserName" class="size-12 rounded-lg bg-white/5 p-1 border border-white/10 shrink-0 overflow-hidden">
+                                <div class="w-full h-full bg-center bg-no-repeat bg-cover pixel-avatar" 
+                                     style='background-image: url("@(string.IsNullOrEmpty(activity.User?.ProfilePicturePath) ? $"https://ui-avatars.com/api/?name={activity.User?.UserName}&background=random" : activity.User?.ProfilePicturePath)");'>
+                                </div>
+                            </a>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                    <a href="/user/@activity.User?.UserName" class="text-primary font-bold hover:underline">@activity.User?.UserName</a>
+                                    
+                                    @if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Review)
+                                    {
+                                        <span class="text-white/40 text-xs">reviewed</span>
+                                    }
+                                    else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Log)
+                                    {
+                                        <span class="text-white/40 text-xs">logged</span>
+                                    }
+                                    else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.ListCreated)
+                                    {
+                                        <span class="text-white/40 text-xs">created list</span>
+                                    }
+
+                                    @if (activity.Game != null)
+                                    {
+                                        <a href="/game/@activity.Game.Slug" class="text-white font-bold hover:text-primary transition-colors">@activity.Game.Title</a>
+                                    }
+                                    else if (activity.List != null)
+                                    {
+                                         <a href="/list/details/@activity.List.Id" class="text-white font-bold hover:text-primary transition-colors">@activity.List.Title</a>
+                                    }
+                                </div>
+
+                                @if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Review && activity.Review != null)
+                                {
+                                    <div class="flex items-center gap-1 text-primary mb-3">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' @(i <= activity.Review.Rating ? 1 : 0)">star</span>
+                                        }
+                                    </div>
+                                    <p class="text-white/70 text-sm leading-relaxed italic border-l-2 border-primary/30 pl-3">"@activity.Review.Content"</p>
+                                }
+                                else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Log && activity.Log != null)
+                                {
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-bold uppercase tracking-wider text-white/70">
+                                            @activity.Log.Status
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-white/20 text-[10px] font-bold uppercase shrink-0">
+                                @activity.Date.ToString("MMM dd")
+                            </div>
+                        </div>
                     </div>
-                    <div class="review-content">
-                        @if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Review)
-                        {
-                            <div class="review-header">
-                                <span class="reviewer-name">@activity.User?.UserName</span>
-                                <span class="review-text-light">reviewed</span>
-                                <a class="game-link" href="/game/@activity.Game?.Slug">@activity.Game?.Title</a>
-                            </div>
-                            <div class="review-stars">
-                                @for(int i=0; i<activity.Review?.Rating; i++) { <span class="star filled">★</span> }
-                            </div>
-                            <p class="review-text">@activity.Review?.Content</p>
-                        }
-                        else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.Log)
-                        {
-                            <div class="review-header">
-                                <span class="reviewer-name">@activity.User?.UserName</span>
-                                <span class="review-text-light">logged</span>
-                                <a class="game-link" href="/game/@activity.Game?.Slug">@activity.Game?.Title</a>
-                                <span class="review-text-light">as</span>
-                                <span style="color: var(--neon-cyan); font-weight: bold;">@activity.Log?.Status</span>
-                            </div>
-                            <p class="review-text" style="font-style: italic; color: #666; font-size: 0.85rem;">@activity.Date.ToString("MMM dd, HH:mm")</p>
-                        }
-                        else if (activity.Type == GameLoggd.Models.ViewModels.ActivityType.ListCreated)
-                        {
-                            <div class="review-header">
-                                <span class="reviewer-name">@activity.User?.UserName</span>
-                                <span class="review-text-light">created a list</span>
-                                <a class="game-link" href="/list/@activity.List?.Id">@activity.List?.Title</a>
-                            </div>
-                            <p class="review-text">@activity.List?.Description</p>
-                        }
-                    </div>
+                }
+            }
+            else
+            {
+                 <div class="p-8 text-center text-white/40 border border-white/10 rounded-xl bg-white/5">
+                    No recent activity. Be the first to log something!
                 </div>
             }
-            @if(!Model.Activities.Any())
-            {
-                 <p style="color: #666; text-align: center; padding: 2rem;">No recent activity.</p>
-            }
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="bg-primary/10 border border-primary/20 p-6 rounded-xl">
+                <h3 class="text-primary text-sm font-black uppercase mb-4 tracking-widest">Quick Log</h3>
+                <form action="/games" method="get" class="flex flex-col gap-3">
+                    <div class="relative">
+                        <input name="search" class="w-full bg-black/40 border-white/10 rounded-lg text-sm p-3 focus:ring-primary focus:border-primary text-white" placeholder="Search a game to log..." type="text" />
+                    </div>
+                    <button type="submit" class="bg-primary text-black font-bold py-3 rounded-lg text-sm uppercase tracking-tighter hover:brightness-110">Post Activity</button>
+                </form>
+            </div>
+            
+             <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
+                <h3 class="text-white/50 text-xs font-black uppercase mb-4 tracking-widest">Trending Lists</h3>
+                 <!-- Placeholder static lists for now, could be dynamic later -->
+                <div class="space-y-4">
+                    <a class="block group" href="/list">
+                        <p class="text-white text-sm font-bold group-hover:text-primary">"Essential RPGs 2024"</p>
+                        <p class="text-white/40 text-[10px]">Curated by Staff</p>
+                    </a>
+                     <a class="block group" href="/list">
+                        <p class="text-white text-sm font-bold group-hover:text-primary">"Relaxing Sim Games"</p>
+                        <p class="text-white/40 text-[10px]">Community Favorite</p>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-</section>
+</div>

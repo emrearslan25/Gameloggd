@@ -3,23 +3,37 @@
     ViewData["Title"] = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
+    <div class="size-24 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6 animate-pulse">
+        <span class="material-symbols-outlined text-5xl text-red-500">error_outline</span>
+    </div>
+    
+    <h1 class="text-4xl font-black text-white uppercase tracking-tighter mb-2">System Error</h1>
+    <h2 class="text-xl text-white/60 mb-8 font-mono">An error occurred while processing your request.</h2>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    @if (Model.ShowRequestId)
+    {
+        <div class="bg-black/30 border border-white/10 rounded-lg p-4 mb-8 font-mono text-sm inline-block">
+            <span class="text-white/40 uppercase tracking-widest text-xs block mb-1">Request ID</span>
+            <code class="text-accent-cyan">@Model.RequestId</code>
+        </div>
+    }
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    <div class="max-w-2xl text-left bg-white/5 border border-white/10 rounded-xl p-6">
+        <h3 class="text-white font-bold mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-yellow-500">warning</span>
+            Development Mode
+        </h3>
+        <p class="text-white/60 text-sm leading-relaxed mb-4">
+            Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+        </p>
+        <p class="text-white/60 text-sm leading-relaxed bg-black/20 p-3 rounded border border-white/5">
+            <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
+            It can result in displaying sensitive information from exceptions to end users.
+        </p>
+    </div>
+    
+    <a href="/" class="mt-8 px-8 py-3 bg-primary text-background-dark font-bold uppercase tracking-widest rounded-lg hover:bg-white transition-colors">
+        Return Home
+    </a>
+</div>

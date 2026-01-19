@@ -4,274 +4,114 @@
     ViewData["Title"] = "Texas Hold'em";
 }
 
-<style>
-    .poker-room {
-        background-color: #050505;
-        background-image: 
-            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-        background-size: 30px 30px;
-        min-height: 800px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 2rem;
-        font-family: 'Courier New', monospace;
-        color: #fff;
-    }
-
-
-    .poker-table {
-        position: relative;
-        width: 900px; /* Wider table */
-        height: 450px;
-        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-        border-radius: 250px;
-        border: 4px solid var(--neon-cyan);
-        box-shadow: 
-            0 0 20px rgba(0, 255, 255, 0.2),
-            inset 0 0 100px rgba(0,0,0,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 80px 0; /* More vertical space */
-    }
-
-    .community-cards {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 0; /* Centered */
-        padding: 1.5rem;
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 12px;
-        background: rgba(0,0,0,0.4);
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    .pot-display {
-        position: absolute;
-        top: 25%; /* Higher up */
-        font-size: 1rem;
-        background: rgba(0,0,0,0.8);
-        padding: 5px 15px;
-        border-radius: 20px;
-        border: 1px solid var(--neon-purple);
-        color: var(--neon-purple);
-        box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
-        z-index: 5;
-    }
-
-    .seat {
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 200px;
-    }
-
-    .dealer-seat { top: -110px; } /* Push out further */
-    .player-seat { bottom: -110px; }
-
-    .hole-cards {
-        display: flex;
-        gap: 5px;
-    }
-
-    .chips-stack {
-        margin-top: 10px;
-        font-size: 1.1rem;
-        color: #ffd700;
-        text-shadow: 0 0 5px #ffd700;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
+<div class="w-full min-h-screen pt-24 pb-12 px-4 flex flex-col items-center">
     
-    .chip-icon {
-        width: 20px;
-        height: 20px;
-        background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
-        border-radius: 50%;
-        border: 2px dashed #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
+    <!-- Game Logo -->
+    <div class="mb-8 text-center space-y-2 animate-slide-in-up">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-4xl mb-4 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+            🏆
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black font-display text-white tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]">
+            Texas Hold'em
+        </h1>
+        <p class="text-yellow-500/70 font-mono text-sm tracking-widest uppercase">Heads Up • No Limit</p>
+    </div>
 
-    /* Reuse Blackjack card styles */
-    .pk-card {
-        width: 70px;
-        height: 100px;
-        background: #111;
-        border-radius: 6px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.2rem;
-        font-weight: bold;
-        position: relative;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        border: 2px solid #333;
-        transition: transform 0.3s;
-    }
-
-    .pk-card.red { 
-        color: #ff0055; 
-        border-color: #ff0055;
-        box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
-    }
-    
-    .pk-card.black { 
-        color: #00e5ff; 
-        border-color: #00e5ff;
-        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
-    }
-    
-    .pk-card.hidden {
-        background: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 5px, #222 5px, #222 10px);
-        border: 2px solid #555;
-        box-shadow: none;
-    }
-    .pk-card.hidden .center-suit, .pk-card.hidden .corner-top, .pk-card.hidden .corner-bottom { display: none; }
-
-    .controls-bar {
-        background: rgba(10,10,10,0.9);
-        padding: 1rem;
-        border-radius: 10px;
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        border: 1px solid #333;
-    }
-
-    .action-btn {
-        padding: 10px 20px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        text-transform: uppercase;
-        transition: all 0.2s;
-        background: transparent;
-        border: 2px solid #555;
-        color: #aaa;
-    }
-    
-    .action-btn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        filter: brightness(1.2);
-    }
-
-    .action-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
-    .btn-fold { border-color: #ff0055; color: #ff0055; box-shadow: 0 0 5px rgba(255,0,85,0.2); }
-    .btn-check { border-color: #00e5ff; color: #00e5ff; box-shadow: 0 0 5px rgba(0,229,255,0.2); }
-    .btn-call { border-color: #00ff88; color: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.2); }
-    .btn-raise { border-color: #ffeb3b; color: #ffeb3b; box-shadow: 0 0 5px rgba(255,235,59,0.2); }
-    
-    .btn-start { 
-        background: var(--neon-cyan); 
-        color: black; 
-        font-size: 1.2rem; 
-        padding: 15px 30px; 
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); 
-        border: none;
-    }
-
-    .game-log {
-        margin-top: 1rem;
-        color: #fff;
-        font-size: 1.1rem;
-        height: 1.5rem;
-        text-shadow: 0 0 5px rgba(255,255,255,0.5);
-    }
-    
-    .dealer-bubble {
-        position: absolute;
-        top: -50px;
-        right: -130px;
-        background: #000;
-        color: #fff;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid var(--neon-cyan);
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        font-weight: bold;
-        width: 150px;
-        text-align: center;
-        opacity: 0;
-        transition: opacity 0.3s;
-        z-index: 10;
-    }
-    
-    .dealer-bubble::after {
-        content: '';
-        position: absolute;
-        left: -10px;
-        top: 50%;
-        border-width: 10px;
-        border-style: solid;
-        border-color: transparent var(--neon-cyan) transparent transparent;
-        transform: translateY(-50%);
-    }
-
-    .dealer-bubble.show { opacity: 1; }
-</style>
-
-<div class="page-container">
-    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Texas Hold'em</h1>
-
-    <div class="poker-room">
+    <!-- Game Table -->
+    <div class="w-full max-w-4xl bg-[#050505] border border-yellow-500/30 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-[0_0_50px_rgba(234,179,8,0.15)] flex flex-col justify-between min-h-[700px]">
         
-        <div class="poker-table">
-            <!-- Dealer Seat -->
-            <div class="seat dealer-seat">
-                <div class="hole-cards" id="dealer-cards">
-                    <div class="pk-card hidden"></div>
-                    <div class="pk-card hidden"></div>
+        <!-- Background Decorations -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, rgba(234,179,8,0.1) 0%, transparent 50%);"></div>
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent opacity-50"></div>
+
+        <!-- Dealer Area (Top) -->
+        <div class="flex flex-col items-center gap-4 z-10 relative">
+            <div class="relative">
+                <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-widest">
+                    Dealer
                 </div>
-                <div class="chips-stack">
-                    <div class="chip-icon"></div>
-                    <span id="dealer-chips">1000</span>
+                <!-- Dealer Message Bubble -->
+                <div id="dealer-msg" class="absolute left-full top-0 ml-4 py-2 px-4 bg-black border border-white/20 rounded-xl rounded-tl-none text-white text-xs font-bold whitespace-nowrap opacity-0 transition-opacity duration-300 shadow-lg z-20">
+                    Check
                 </div>
-                <div class="dealer-bubble" id="dealer-msg">Check</div>
             </div>
 
-            <!-- Pot -->
-            <div class="pot-display">
-                Pot: <span id="pot-amount">0</span>
+            <div class="flex justify-center gap-2 md:gap-4 min-h-[140px]" id="dealer-cards">
+                <!-- Dealer Cards -->
+            </div>
+
+            <div class="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg border border-white/5">
+                <span class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Chips</span>
+                <span class="font-mono font-bold text-white text-sm" id="dealer-chips">1000</span>
+            </div>
+        </div>
+
+        <!-- Community Area (Center) -->
+        <div class="flex flex-col items-center justify-center gap-6 my-8 z-10">
+            
+            <!-- Pot Display -->
+            <div class="px-8 py-2 rounded-full bg-black/60 border border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.1)] flex items-center gap-3">
+                <span class="text-xs font-bold uppercase text-white/50 tracking-wider">Pot</span>
+                <span class="text-2xl font-mono font-bold text-yellow-400" id="pot-amount">0</span>
             </div>
 
             <!-- Community Cards -->
-            <div class="community-cards" id="community-cards">
-                <!-- Injected via JS -->
+            <div class="flex justify-center gap-2 md:gap-4 min-h-[140px] px-4 py-6 rounded-2xl bg-white/5 border border-white/5 w-full max-w-2xl" id="community-cards">
+                <!-- Community Cards -->
             </div>
 
-            <!-- Player Seat -->
-            <div class="seat player-seat">
-                <div class="hole-cards" id="player-cards">
+            <div id="game-status-text" class="text-white/40 font-mono text-xs uppercase tracking-widest">Pre-Flop</div>
+        </div>
+
+        <!-- Player Area (Bottom) -->
+        <div class="flex flex-col items-center gap-6 z-10 mt-auto">
+            
+            <div class="flex justify-center gap-2 md:gap-4 min-h-[140px]" id="player-cards">
+                <!-- Player Cards -->
+            </div>
+
+            <div class="w-full flex items-center justify-between px-4 md:px-12">
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-lg border border-white/5 mb-2">
+                        <span class="text-[0.6rem] font-bold uppercase text-white/30 tracking-wider">Chips</span>
+                        <span class="font-mono font-bold text-accent-cyan text-sm" id="player-chips">1000</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan text-xs font-bold uppercase tracking-widest">
+                        You
+                    </div>
                 </div>
-                <div class="chips-stack">
-                    <div class="chip-icon"></div>
-                    <span id="player-chips">1000</span>
+
+                <!-- Controls -->
+                <div class="flex gap-2" id="game-controls">
+                    <button class="px-4 py-2 md:px-6 md:py-3 bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg font-bold uppercase text-xs hover:bg-red-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed action-btn" onclick="sendAction('fold')">Fold</button>
+                    <button class="px-4 py-2 md:px-6 md:py-3 bg-blue-500/10 border border-blue-500/50 text-blue-500 rounded-lg font-bold uppercase text-xs hover:bg-blue-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed action-btn" onclick="sendAction('check')">Check</button>
+                    <button class="px-4 py-2 md:px-6 md:py-3 bg-green-500/10 border border-green-500/50 text-green-500 rounded-lg font-bold uppercase text-xs hover:bg-green-500 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed action-btn" onclick="sendAction('call')">Call</button>
+                    <button class="px-4 py-2 md:px-6 md:py-3 bg-yellow-500/10 border border-yellow-500/50 text-yellow-500 rounded-lg font-bold uppercase text-xs hover:bg-yellow-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed action-btn" onclick="sendAction('raise')">Raise</button>
                 </div>
+            </div>
+
+            <div id="start-area" class="w-full text-center mt-4">
+                <button class="w-full md:w-auto px-12 py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-105 hover:shadow-[0_0_30px_rgba(234,179,8,0.4)] transition-all flex items-center justify-center gap-2 mx-auto" id="btn-start" onclick="startGame()">
+                    <span class="material-symbols-outlined">playing_cards</span>
+                    Deal Hand
+                </button>
             </div>
         </div>
 
-        <div class="game-log" id="game-message">Press DEAL to start</div>
-
-        <div class="controls-bar" id="game-controls" style="display:none;">
-            <button class="action-btn btn-fold" onclick="sendAction('fold')">Fold</button>
-            <button class="action-btn btn-check" onclick="sendAction('check')">Check</button>
-            <button class="action-btn btn-call" onclick="sendAction('call')">Call</button>
-            <button class="action-btn btn-raise" onclick="sendAction('raise')">Raise</button>
-        </div>
-        
-        <div style="margin-top: 2rem;">
-            <button class="action-btn btn-start" id="btn-start" onclick="startGame()">DEAL HAND</button>
+        <!-- Result Overlay -->
+        <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden" id="result-overlay">
+            <div class="text-center space-y-6 animate-zoom-in p-8 border border-white/10 bg-black/90 rounded-2xl shadow-2xl max-w-sm w-full mx-4">
+                <h2 class="text-4xl font-black font-display text-white tracking-tighter italic drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]" id="result-title">
+                    YOU WIN!
+                </h2>
+                <div class="text-white/50 font-mono" id="result-desc">Full House</div>
+                <div class="pt-4">
+                    <button class="w-full px-8 py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-105 transition-all flex items-center justify-center gap-2" onclick="closeOverlay()">
+                        Next Hand
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -279,61 +119,95 @@
 
 @section Scripts {
     <script>
-        function renderCard(card) {
-             if (!card || card.isHidden) {
-                 return `<div class="pk-card hidden"><div class="center-suit"></div></div>`;
-             }
-             const isRed = card.suit === 0 || card.suit === 1; 
-             const colorClass = isRed ? 'red' : 'black';
-             const suits = ['♥', '♦', '♣', '♠'];
-             const suitSymbol = suits[card.suit];
-             
-             let rankStr = card.rank;
-             if (card.rank === 11) rankStr = 'J';
-             else if (card.rank === 12) rankStr = 'Q';
-             else if (card.rank === 13) rankStr = 'K';
-             else if (card.rank === 14) rankStr = 'A';
+        function createCardHtml(card, index, isNew) {
+            const animationClass = isNew ? 'animate-zoom-in' : '';
+            const styleDelay = isNew ? `animation-delay: ${index * 100}ms; animation-fill-mode: backwards;` : '';
 
-             return `<div class="pk-card ${colorClass}">
-                        <div class="corner-top"><span>${rankStr}</span><span>${suitSymbol}</span></div>
-                        <div class="center-suit" style="font-size:2rem;">${suitSymbol}</div>
-                        <div class="corner-bottom" style="transform: rotate(180deg);"><span>${rankStr}</span><span>${suitSymbol}</span></div>
+            if (!card || card.isHidden) {
+                 return `<div class="w-16 h-24 md:w-20 md:h-28 bg-[#1a1a1a] rounded-lg border-2 border-white/10 flex items-center justify-center shadow-lg relative overflow-hidden ${animationClass}" style="${styleDelay}">
+                            <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:250%_250%] animate-pulse"></div>
+                            <div class="text-2xl text-white/20 font-display">?</div>
+                        </div>`;
+            }
+
+            const isRed = card.suit === 0 || card.suit === 1; 
+            const colorClass = isRed ? 'text-red-500 border-red-500/30' : 'text-accent-cyan border-accent-cyan/30';
+            const shadowClass = isRed ? 'shadow-[0_0_10px_rgba(239,68,68,0.15)]' : 'shadow-[0_0_10px_rgba(34,211,238,0.15)]';
+            
+            const suits = ['♥', '♦', '♣', '♠'];
+            const suitSymbol = suits[card.suit];
+            
+            let rankStr = card.rank;
+            if (card.rank === 11) rankStr = 'J';
+            else if (card.rank === 12) rankStr = 'Q';
+            else if (card.rank === 13) rankStr = 'K';
+            else if (card.rank === 14) rankStr = 'A';
+
+            return `<div class="w-16 h-24 md:w-20 md:h-28 bg-[#151515] rounded-lg border-2 flex flex-col items-center justify-center relative ${colorClass} ${shadowClass} ${animationClass}" style="${styleDelay}">
+                        <div class="absolute top-1 left-1 flex flex-col items-center text-[0.6rem] font-bold leading-none">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
+                        <div class="text-3xl drop-shadow-md">${suitSymbol}</div>
+                        <div class="absolute bottom-1 right-1 flex flex-col items-center text-[0.6rem] font-bold leading-none rotate-180">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
                     </div>`;
         }
 
         function updateUI(data) {
-            // Cards
-            document.getElementById('player-cards').innerHTML = data.playerHole.map(renderCard).join('');
-            document.getElementById('dealer-cards').innerHTML = data.dealerHole.map(renderCard).join('');
-            document.getElementById('community-cards').innerHTML = data.community.map(renderCard).join('');
+            // Render Cards with basic diffing (replace all for now, optimize if needed)
+            document.getElementById('player-cards').innerHTML = data.playerHole.map((c, i) => createCardHtml(c, i, true)).join('');
+            document.getElementById('dealer-cards').innerHTML = data.dealerHole.map((c, i) => createCardHtml(c, i, true)).join('');
+            document.getElementById('community-cards').innerHTML = data.community.map((c, i) => createCardHtml(c, i, true)).join('');
             
             // Chips
             document.getElementById('player-chips').innerText = data.playerChips;
             document.getElementById('dealer-chips').innerText = data.dealerChips;
             document.getElementById('pot-amount').innerText = data.pot;
-
-            // Message
-            document.getElementById('game-message').innerText = `${data.stage}: ${data.message}`;
             
-            if (data.message.includes("Dealer")) {
+            document.getElementById('game-status-text').innerText = `${data.stage}`;
+
+            // Message Bubble
+            if (data.message && data.message.includes("Dealer")) {
                 const bubble = document.getElementById('dealer-msg');
                 bubble.innerText = data.message;
-                bubble.classList.add('show');
-                setTimeout(() => bubble.classList.remove('show'), 3000);
+                bubble.classList.remove('opacity-0');
+                setTimeout(() => bubble.classList.add('opacity-0'), 3000);
             }
 
-            // Controls
-            if (data.stage === 'GameOver' || data.winner !== null && data.winner !== "") {
-                document.getElementById('game-controls').style.display = 'none';
-                document.getElementById('btn-start').style.display = 'block';
-                document.getElementById('btn-start').innerText = "NEXT HAND";
-            } else {
-                document.getElementById('game-controls').style.display = 'flex';
-                document.getElementById('btn-start').style.display = 'none';
+            // Game End Overlay
+            if (data.stage === 'GameOver' || (data.winner !== null && data.winner !== "")) {
+                const ol = document.getElementById('result-overlay');
+                document.getElementById('result-title').innerText = data.message; 
+                document.getElementById('result-desc').innerText = `Pot: ${data.pot}`;
                 
-                // Disable buttons based on turn
+                document.getElementById('game-controls').classList.add('hidden');
+                document.getElementById('start-area').classList.add('hidden');
+                
+                setTimeout(() => {
+                    ol.classList.remove('hidden');
+                    ol.classList.add('flex');
+                }, 1500);
+            } else {
+                document.getElementById('result-overlay').classList.add('hidden');
+                document.getElementById('result-overlay').classList.remove('flex');
+                
+                document.getElementById('game-controls').classList.remove('hidden');
+                document.getElementById('game-controls').classList.add('flex');
+                document.getElementById('start-area').classList.add('hidden');
+                
+                // Disable buttons
                 const btns = document.querySelectorAll('.action-btn');
-                btns.forEach(b => b.disabled = !data.turn);
+                btns.forEach(b => {
+                    b.disabled = !data.turn;
+                    if(!data.turn) {
+                        b.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        b.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                });
             }
         }
 
@@ -359,6 +233,13 @@
                 const data = await response.json();
                 updateUI(data);
             } catch (err) { console.error(err); }
+        }
+
+        function closeOverlay() {
+            document.getElementById('result-overlay').classList.add('hidden');
+            document.getElementById('result-overlay').classList.remove('flex');
+            document.getElementById('start-area').classList.remove('hidden');
+            document.getElementById('btn-start').innerHTML = `<span class="material-symbols-outlined">playing_cards</span> Deal New Hand`;
         }
     </script>
 }

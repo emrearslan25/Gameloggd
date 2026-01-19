@@ -4,63 +4,60 @@
     ViewData["Title"] = Model.Title;
 }
 
-<div class="list-hero" style="background: linear-gradient(to bottom, rgba(10,10,10,0.8), var(--bg-dark)), url('/images/hero-bg.jpg'); background-size: cover; padding: 4rem 0 2rem 0; border-bottom: 1px solid var(--border-color); position: relative;">
-    <div class="page-container">
-        <div style="display: flex; gap: 2rem; align-items: flex-start;">
-            <!-- Icon / Cover -->
-            <div style="width: 120px; height: 120px; border-radius: 1rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-cyan); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--neon-cyan);">
-                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
-                </svg>
+<div class="w-full relative">
+    <!-- Hero Background -->
+    <div class="absolute inset-0 h-[400px] overflow-hidden -z-10">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-background-dark"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+    </div>
+
+    <div class="page-container py-12 px-6 max-w-[1400px] mx-auto min-h-screen">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row gap-8 items-start mb-12">
+            <!-- Icon/Cover -->
+            <div class="shrink-0 size-32 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl shadow-primary/10">
+                <span class="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(13,242,51,0.5)]">format_list_bulleted</span>
             </div>
             
-            <div style="flex: 1;">
-                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+            <div class="flex-1 w-full">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                     <div>
-                         <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 0 20px rgba(0,0,0,0.5);">@Model.Title</h1>
-                         <div style="display: flex; align-items: center; gap: 1rem; color: var(--text-secondary);">
-                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                 <div class="user-avatar" style="width: 1.5rem; height: 1.5rem; font-size: 0.8rem;">
+                         <h1 class="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase drop-shadow-lg mb-2">@Model.Title</h1>
+                         <div class="flex flex-wrap items-center gap-4 text-sm text-white/60 font-mono">
+                             <div class="flex items-center gap-2">
+                                 <div class="size-6 rounded-full bg-accent-purple flex items-center justify-center text-[10px] text-white font-bold">
                                      @Model.User.UserName.ToUpper()[0]
                                  </div>
-                                 <a href="/user/@Model.User.UserName" style="color: white; font-weight: 500; hover: underline;">@Model.User.UserName</a>
+                                 <a href="/user/@Model.User.UserName" class="text-white hover:text-primary transition-colors font-bold">@Model.User.UserName</a>
                              </div>
-                             <span>•</span>
+                             <span>//</span>
                              <span>@Model.Items.Count games</span>
-                             <span>•</span>
+                             <span>//</span>
                              <span>Updated @Model.UpdatedAt.ToString("MMM yyyy")</span>
                          </div>
                     </div>
                     
-                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <div class="flex items-center gap-3">
                         <!-- Like Button -->
                          <form action="/list/like" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="listId" value="@Model.Id" />
-                            <button type="submit" class="btn-secondary" style="display: flex; align-items: center; gap: 0.5rem; border-color: @(ViewBag.IsLiked == true ? "#ff304f" : ""); color: @(ViewBag.IsLiked == true ? "#ff304f" : "");">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="@(ViewBag.IsLiked == true ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                                <span>@ViewBag.LikeCount</span>
+                            <button type="submit" class="h-10 px-4 rounded-lg border border-white/10 flex items-center gap-2 transition-all hover:bg-white/10 @(ViewBag.IsLiked == true ? "text-red-500 border-red-500/50 bg-red-500/10" : "text-white/60")">
+                                <span class="material-symbols-outlined text-[20px] @(ViewBag.IsLiked == true ? "fill-current" : "")">favorite</span>
+                                <span class="font-bold font-mono">@ViewBag.LikeCount</span>
                             </button>
                         </form>
 
                         @if (User.Identity.IsAuthenticated && User.Identity.Name == Model.User.UserName)
                         {
-                             <a href="/list/@Model.Id/add" class="btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">
-                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.5rem;">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                                Add Games
+                             <a href="/list/@Model.Id/add" class="h-10 px-4 flex items-center gap-2 bg-primary text-background-dark rounded-lg font-bold uppercase tracking-wider text-sm hover:bg-white hover:text-black transition-all">
+                                 <span class="material-symbols-outlined text-[20px]">add</span>
+                                 <span>Add Games</span>
                              </a>
                              <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this list?');">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-secondary" style="border-color: #ff4444; color: #ff4444; padding: 0.5rem 1rem;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
+                                <button type="submit" class="size-10 flex items-center justify-center rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors" title="Delete List">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
                             </form>
                         }
@@ -69,26 +66,28 @@
                 
                 @if (!string.IsNullOrEmpty(Model.Description))
                 {
-                    <p style="color: #ccc; max-width: 800px; line-height: 1.6; font-size: 1.1rem;">@Model.Description</p>
+                    <p class="mt-6 text-white/80 text-lg leading-relaxed max-w-3xl border-l-2 border-primary/50 pl-4">@Model.Description</p>
                 }
             </div>
         </div>
-    </div>
-</div>
-
-<div class="page-container" style="padding: 2rem 1.5rem;">
-    @if (Model.Items.Any())
-    {
-        @await Html.PartialAsync("_GameGrid", Model.Items.Select(i => i.Game).ToList())
-    }
-    else
-    {
-        <div style="text-align: center; padding: 6rem; color: var(--text-secondary); background: var(--bg-card); border-radius: 1rem; border: 1px dashed var(--border-color);">
-            <p style="margin-bottom: 1rem; font-size: 1.1rem;">This list is currently empty.</p>
-            @if (User.Identity.IsAuthenticated && User.Identity.Name == Model.User.UserName)
+        
+        <!-- Game Grid -->
+        <div class="border-t border-white/10 pt-10">
+            @if (Model.Items.Any())
             {
-                <a href="/list/@Model.Id/add" style="color: var(--neon-cyan); font-weight: 500;">Search for games to add →</a>
+                @await Html.PartialAsync("_GameGrid", Model.Items.Select(i => i.Game).ToList())
+            }
+            else
+            {
+                <div class="flex flex-col items-center justify-center py-24 bg-white/5 border border-white/10 border-dashed rounded-2xl">
+                    <span class="material-symbols-outlined text-4xl text-white/20 mb-4">playlist_add</span>
+                    <p class="text-white/40 text-lg font-medium mb-4">This list is currently empty.</p>
+                    @if (User.Identity.IsAuthenticated && User.Identity.Name == Model.User.UserName)
+                    {
+                        <a href="/list/@Model.Id/add" class="text-primary hover:text-white font-bold underline decoration-primary/30 hover:decoration-white transition-colors">Search for games to add →</a>
+                    }
+                </div>
             }
         </div>
-    }
+    </div>
 </div>

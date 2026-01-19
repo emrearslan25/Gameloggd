@@ -1,36 +1,52 @@
 @model GameLoggd.Models.Domain.UserList
-
 @{
     ViewData["Title"] = "Create New List";
 }
 
-<div class="page-container" style="max-width: 600px; padding-top: 3rem;">
-    <div style="margin-bottom: 2rem;">
-        <a asp-action="Index" style="color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Back to lists
-        </a>
-        <h1>Create New List</h1>
-    </div>
-
-    <div style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 2rem;">
-        <form asp-action="Create">
-            <div style="margin-bottom: 1.5rem;">
-                <label asp-for="Title" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">List Title</label>
-                <input asp-for="Title" class="search-input" style="width: 100%; border-radius: 0.5rem; padding: 0.75rem 1rem;" placeholder="e.g. Top 10 Horror Games" autofocus />
-                <span asp-validation-for="Title" class="text-danger" style="color: #ff4444; font-size: 0.875rem; display: block; margin-top: 0.25rem;"></span>
+<div class="w-full min-h-screen pt-24 pb-12 px-4">
+    <div class="max-w-2xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <div class="space-y-4">
+            <a asp-action="Index" class="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider group">
+                <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                Back to lists
+            </a>
+            
+            <div class="space-y-2">
+                <h1 class="text-4xl font-bold font-display text-white tracking-tighter">Create New List</h1>
+                <p class="text-white/50 font-medium">Curate your collection and share it with the world.</p>
             </div>
+        </div>
 
-            <div style="margin-bottom: 2rem;">
-                <label asp-for="Description" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Description <span style="font-weight: 400; opacity: 0.7;">(Optional)</span></label>
-                <textarea asp-for="Description" class="search-input" rows="4" style="width: 100%; border-radius: 0.5rem; padding: 0.75rem 1rem; resize: vertical; min-height: 100px;" placeholder="What is this list about?"></textarea>
-            </div>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
+            <form asp-action="Create" class="space-y-6">
+                
+                <div class="space-y-2">
+                    <label asp-for="Title" class="block text-xs font-bold uppercase tracking-widest text-white/50">List Title</label>
+                    <input asp-for="Title" class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:bg-white/5 hover:border-white/30 transition-all font-medium placeholder:text-white/20" placeholder="e.g. Top 10 Horror Games of All Time" autofocus />
+                    <span asp-validation-for="Title" class="text-red-500 text-xs font-bold block"></span>
+                </div>
 
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <button type="submit" class="btn-primary" style="flex: 1; justify-content: center;">Create List</button>
-            </div>
-        </form>
+                <div class="space-y-2">
+                    <label asp-for="Description" class="block text-xs font-bold uppercase tracking-widest text-white/50">
+                        Description 
+                        <span class="text-white/30 font-medium normal-case ml-1">(Optional)</span>
+                    </label>
+                    <textarea asp-for="Description" rows="4" class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:bg-white/5 hover:border-white/30 transition-all font-medium resize-y min-h-[120px] placeholder:text-white/20" placeholder="Tell us what this list is about..."></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-white/10">
+                    <button type="submit" class="w-full bg-primary text-background-dark hover:bg-white hover:text-black font-bold uppercase tracking-wider py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(13,242,51,0.2)] hover:shadow-[0_0_30px_rgba(13,242,51,0.4)] flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">playlist_add</span>
+                        Create List
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

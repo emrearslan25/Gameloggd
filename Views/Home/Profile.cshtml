@@ -1,251 +1,353 @@
 @model GameLoggd.Models.ViewModels.UserProfileViewModel
-
 @{
     ViewData["Title"] = Model.User.UserName;
 }
 
-<div class="profile-hero" style="background: linear-gradient(to bottom, rgba(10,10,10,0.3), var(--bg-dark)), url('@(string.IsNullOrEmpty(Model.User.CoverPhotoPath) ? $"https://ui-avatars.com/api/?name={Model.User.UserName}&background=random&size=512&font-size=0.33" : Model.User.CoverPhotoPath)'); background-size: cover; background-position: center;">
-    <div class="page-container">
-        <div class="profile-header">
-            <div class="profile-avatar">
-                @if (!string.IsNullOrEmpty(Model.User.ProfilePicturePath))
-                {
-                    <img src="@Model.User.ProfilePicturePath" alt="@Model.User.UserName" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                }
-                else
-                {
-                    @Model.User.UserName.ToUpper()[0]
-                }
-            </div>
-            
-            <div class="profile-info">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <h1 style="font-size: 2.5rem; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">@Model.User.UserName</h1>
-                        <p class="profile-username">@@@Model.User.UserName</p>
-                        <p class="profile-bio">@(string.IsNullOrEmpty(Model.User.Bio) ? "Just another gamer enjoying the digital worlds." : Model.User.Bio)</p>
+@section Styles {
+    <style>
+        .glitch-overlay {
+            background: linear-gradient(rgba(13, 242, 51, 0.1) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        .neon-ring {
+            box-shadow: 0 0 15px rgba(13, 242, 51, 0.6), inset 0 0 10px rgba(13, 242, 51, 0.4);
+        }
+        /* Tab active state styling */
+        .tab-btn.active {
+            border-bottom-color: #0df233;
+            color: #0df233;
+        }
+    </style>
+}
+
+<div class="w-full pb-20">
+    <!-- ProfileHeader with Glitch Cover -->
+    <div class="relative w-full h-64 overflow-hidden rounded-b-xl group">
+        <div class="absolute inset-0 bg-center bg-cover transition-transform duration-700 group-hover:scale-105" 
+             style='background-image: url("@(string.IsNullOrEmpty(Model.User.CoverPhotoPath) ? $"https://ui-avatars.com/api/?name={Model.User.UserName}&background=random&size=512&font-size=0.33" : Model.User.CoverPhotoPath)");'>
+        </div>
+        <div class="absolute inset-0 glitch-overlay opacity-40"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent"></div>
+    </div>
+
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-10 -mt-20 relative z-10">
+        <div class="flex flex-col @@container">
+            <div class="flex w-full flex-col gap-4 items-center sm:items-start sm:flex-row sm:justify-between">
+                <div class="flex gap-6 flex-col sm:flex-row items-center sm:items-end">
+                    <div class="relative">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-40 w-40 border-4 border-background-dark neon-ring overflow-hidden" 
+                             style='background-image: url("@(string.IsNullOrEmpty(Model.User.ProfilePicturePath) ? $"https://ui-avatars.com/api/?name={Model.User.UserName}&background=random" : Model.User.ProfilePicturePath)");'>
+                        </div>
+                        <div class="absolute bottom-3 right-3 h-6 w-6 bg-primary rounded-full border-4 border-background-dark animate-pulse"></div>
                     </div>
-                    
+                    <div class="flex flex-col items-center sm:items-start pb-2">
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-white text-4xl font-bold leading-tight tracking-[-0.015em] font-display">@Model.User.UserName</h1>
+                            <!-- Badge visual placeholder -->
+                            <span class="material-symbols-outlined text-primary text-xl" title="Verified Member">verified</span>
+                        </div>
+                        <p class="text-primary/80 text-lg font-medium leading-normal">
+                            @(string.IsNullOrEmpty(Model.User.Bio) ? "Ready player one." : Model.User.Bio)
+                        </p>
+                        <p class="text-white/40 text-sm font-normal leading-normal uppercase tracking-widest mt-1">Status: Online</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3 mb-2">
                     @if (User.Identity.IsAuthenticated && User.Identity.Name != Model.User.UserName)
                     {
-                        <form asp-action="@(Model.IsFollowing ? "UnfollowUser" : "FollowUser")" asp-controller="Home" method="post">
+                        <form asp-action="ToggleFollow" asp-controller="Home" method="post">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="targetUserId" value="@Model.User.Id" />
-                            <button type="submit" class="@(Model.IsFollowing ? "btn-secondary" : "btn-primary")">
-                                @(Model.IsFollowing ? "Following" : "Follow")
+                            <input type="hidden" name="targetId" value="@Model.User.Id" />
+                            <button type="submit" class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 transition-all font-bold uppercase tracking-wider text-xs @(Model.IsFollowing ? "bg-white/10 text-white hover:bg-white/20" : "bg-white/10 text-white hover:bg-white/20")">
+                                <span class="truncate">@(Model.IsFollowing ? "Unfollow" : "Follow")</span>
                             </button>
                         </form>
+                        <!-- Message Button Placeholder -->
+                         <button class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 bg-primary text-background-dark hover:brightness-110 transition-all font-bold uppercase tracking-wider text-xs">
+                            <span class="truncate">Message</span>
+                        </button>
                     }
                     else if (User.Identity.IsAuthenticated && User.Identity.Name == Model.User.UserName)
                     {
-                         <a href="/account/manage" class="btn-secondary" style="text-decoration: none; font-size: 0.9rem;">Edit Profile</a>
+                         <a href="/account/manage" class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-12 px-6 bg-white/10 text-white hover:bg-white/20 transition-all font-bold uppercase tracking-wider text-xs">
+                            Edit Profile
+                        </a>
                     }
                 </div>
-                
-                <div class="profile-stats">
-                    <div class="stat">
-                        <div class="stat-value">@Model.PlayedGames.Count</div>
-                        <div class="stat-label">Games</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">@Model.Reviews.Count</div>
-                        <div class="stat-label">Reviews</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">@Model.FollowersCount</div>
-                        <div class="stat-label">Followers</div>
-                    </div>
-                     <div class="stat">
-                        <div class="stat-value">@Model.FollowingCount</div>
-                        <div class="stat-label">Following</div>
-                    </div>
+            </div>
+        </div>
+
+        <!-- ProfileStats -->
+        <div class="flex flex-wrap gap-4 py-8 mt-4 border-b border-white/5">
+
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl bg-white/5 border border-white/10 p-5 items-center text-center group hover:border-primary/50 transition-colors">
+                <p class="text-white tracking-tighter text-3xl font-bold leading-tight font-display">@Model.PlayedGames.Count</p>
+                <div class="flex items-center gap-2">
+                    <p class="text-white/50 text-xs font-bold uppercase tracking-widest">Games Logged</p>
+                </div>
+            </div>
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl bg-white/5 border border-white/10 p-5 items-center text-center group hover:border-primary/50 transition-colors">
+                <p class="text-white tracking-tighter text-3xl font-bold leading-tight font-display">@Model.Reviews.Count</p>
+                <div class="flex items-center gap-2">
+                    <p class="text-white/50 text-xs font-bold uppercase tracking-widest">Reviews</p>
+                </div>
+            </div>
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl bg-white/5 border border-white/10 p-5 items-center text-center group hover:border-primary/50 transition-colors">
+                <p class="text-white tracking-tighter text-3xl font-bold leading-tight font-display">@Model.FollowersCount</p>
+                <div class="flex items-center gap-2">
+                    <p class="text-white/50 text-xs font-bold uppercase tracking-widest">Followers</p>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="page-container" style="padding-top: 0;">
-    <!-- Tabs Navigation -->
-    <div style="border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; position: sticky; top: 0; background: var(--bg-dark); z-index: 10; padding-top: 1rem;">
-        <div style="display: flex; gap: 2rem;">
-            <button onclick="switchTab('reviews')" class="tab-btn active" id="tab-reviews" style="background: none; border: none; color: white; padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid var(--neon-cyan); font-weight: 500;">Reviews</button>
-            <button onclick="switchTab('lists')" class="tab-btn" id="tab-lists" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Lists (@Model.Lists.Count)</button>
-            <button onclick="switchTab('playing')" class="tab-btn" id="tab-playing" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Playing (@Model.PlayingGames.Count)</button>
-            <button onclick="switchTab('backlog')" class="tab-btn" id="tab-backlog" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Backlog (@Model.BacklogGames.Count)</button>
-            <button onclick="switchTab('played')" class="tab-btn" id="tab-played" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Played (@Model.PlayedGames.Count)</button>
-            <button onclick="switchTab('likes')" class="tab-btn" id="tab-likes" style="background: none; border: none; color: var(--text-secondary); padding: 1rem 0; font-size: 1rem; cursor: pointer; border-bottom: 2px solid transparent;">Likes (@Model.LikedReviews.Count)</button>
+        <!-- Tabs -->
+        <div class="mt-2">
+            <div class="flex border-b border-white/10 gap-10 overflow-x-auto no-scrollbar" id="profileTabs">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active flex flex-col items-center justify-center border-b-2 border-transparent pb-4 pt-6 transition-all hover:text-white">
+                    <p class="text-sm font-bold leading-normal tracking-widest uppercase">Overview</p>
+                </button>
+                 <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn flex flex-col items-center justify-center border-b-2 border-transparent text-white/50 pb-4 pt-6 transition-all hover:text-white">
+                    <p class="text-sm font-bold leading-normal tracking-widest uppercase">Reviews</p>
+                </button>
+                <button onclick="switchTab('lists')" id="tab-lists" class="tab-btn flex flex-col items-center justify-center border-b-2 border-transparent text-white/50 pb-4 pt-6 transition-all hover:text-white">
+                    <p class="text-sm font-bold leading-normal tracking-widest uppercase">Lists</p>
+                </button>
+                 <button onclick="switchTab('backlog')" id="tab-backlog" class="tab-btn flex flex-col items-center justify-center border-b-2 border-transparent text-white/50 pb-4 pt-6 transition-all hover:text-white">
+                    <p class="text-sm font-bold leading-normal tracking-widest uppercase">Backlog</p>
+                </button>
+            </div>
         </div>
-    </div>
 
-    <!-- Tab Contents -->
-    
-    <!-- Reviews Tab -->
-    <div id="content-reviews" class="tab-content">
-        @if (Model.Reviews.Any())
-        {
-            <div class="reviews-list">
-                @foreach (var review in Model.Reviews)
-                {
-                    <div class="review-card">
-                        <div class="review-avatar avatar-purple" style="border-radius: 4px; width: 60px; height: 80px; overflow: hidden; background: none;">
-                            <img src="@(string.IsNullOrEmpty(review.Game.ImagePath) ? "/images/placeholder_game.jpg" : review.Game.ImagePath)" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                        <div class="review-content">
-                            <div class="review-header">
-                                <a href="/game/@review.Game.Slug" class="game-link" style="font-weight: 600; font-size: 1.1rem; color: white;">@review.Game.Title</a>
-                                <span style="color: var(--text-secondary); font-size: 0.9rem;">@review.Game.Year</span>
-                            </div>
-                            
-                            <div class="review-stars">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="star @(i <= review.Rating ? "filled" : "")">★</span>
-                                }
-                            </div>
-                            
-                            <p class="review-text" style="color: #ccc; margin-bottom: 1rem;">@review.Content</p>
-                            
-                            <div style="font-size: 0.8rem; color: #666;">
-                                Reviewed on @review.CreatedAt.ToString("MMM dd, yyyy")
-                            </div>
-                        </div>
+        <div class="flex flex-col lg:flex-row gap-10 mt-8">
+            <!-- Main Content Column -->
+            <div class="flex-1 min-w-0">
+                
+                <!-- Overview Tab Content -->
+                <div id="content-overview" class="tab-content block animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <!-- Recently Played Grid -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-white text-xl font-bold leading-tight tracking-tight font-display flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">history</span>
+                            Recently Created
+                        </h2>
+                        <!-- <a class="text-primary text-xs font-bold uppercase tracking-widest hover:underline" href="#">View All</a> -->
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-             <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
-                No reviews yet.
-            </div>
-        }
-    </div>
-
-    <!-- Lists Tab -->
-    <div id="content-lists" class="tab-content" style="display: none;">
-         @if (Model.Lists.Any())
-        {
-            <div class="lists-grid">
-                @foreach (var list in Model.Lists)
-                {
-                    <a href="/list/details/@list.Id" style="text-decoration: none;">
-                        <div class="list-card">
-                            <div class="list-thumbnail">
-                                @if (list.Items.Any())
-                                {
-                                    <div class="thumbnail-grid">
-                                        @foreach (var item in list.Items.Take(4))
-                                        {
-                                            <img src="@(string.IsNullOrEmpty(item.Game?.ImagePath) ? "/images/placeholder_game.jpg" : item.Game.ImagePath)" />
-                                        }
+                    
+                    @if(Model.PlayingGames.Any() || Model.PlayedGames.Any()) {
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            @foreach(var log in Model.PlayingGames.Concat(Model.PlayedGames).Take(4)) {
+                                 <a href="/game/@log.Game.Slug" class="group cursor-pointer block">
+                                    <div class="aspect-[3/4] bg-white/10 rounded-lg overflow-hidden relative border border-white/5 group-hover:border-primary transition-all">
+                                        <div class="absolute inset-0 bg-cover bg-center" style='background-image: url("@(string.IsNullOrEmpty(log.Game.ImagePath) ? "/images/placeholder_game.jpg" : log.Game.ImagePath)");'></div>
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-white text-4xl">visibility</span>
+                                        </div>
                                     </div>
-                                }
-                                else
-                                {
-                                    <div class="list-overlay" style="opacity: 1; background: var(--bg-card);">
-                                        <div class="list-icon">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
-                                            </svg>
+                                    <p class="text-white text-sm font-bold mt-2 truncate">@log.Game.Title</p>
+                                    <p class="text-white/40 text-xs">@log.Status</p>
+                                </a>
+                            }
+                        </div>
+                    } else {
+                        <div class="p-6 bg-white/5 rounded-xl border border-white/10 text-white/40 text-sm italic">No recent game activity.</div>
+                    }
+
+                    <!-- Latest Reviews Feed -->
+                    <div class="mt-12">
+                        <h2 class="text-white text-xl font-bold leading-tight tracking-tight font-display mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">rate_review</span>
+                            Latest Reviews
+                        </h2>
+                        <div class="space-y-4">
+                            @if(Model.Reviews.Any()) {
+                                @foreach(var review in Model.Reviews.Take(3)) {
+                                    <div class="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/[0.07] transition-all">
+                                        <div class="flex items-start gap-4">
+                                            <a href="/game/@review.Game.Slug" class="w-16 aspect-[3/4] bg-cover rounded-md flex-shrink-0" style='background-image: url("@(string.IsNullOrEmpty(review.Game.ImagePath) ? "/images/placeholder_game.jpg" : review.Game.ImagePath)");'></a>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between">
+                                                    <a href="/game/@review.Game.Slug" class="text-white text-lg font-bold hover:text-primary truncate">@review.Game.Title</a>
+                                                    <div class="flex text-primary">
+                                                         @for (int i = 0; i < 5; i++) {
+                                                            double val = review.Rating - i;
+                                                            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' @(val >= 1 ? 1 : 0)">@(val >= 1 ? "star" : (val >= 0.5 ? "star_half" : "star"))</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <p class="text-white/60 text-sm mt-2 leading-relaxed line-clamp-3">"@review.Content"</p>
+                                                <div class="flex items-center gap-6 mt-4">
+                                                    <!-- Likes placeholder -->
+                                                    <button class="flex items-center gap-2 text-white/40 hover:text-primary transition-all group">
+                                                        <span class="material-symbols-outlined text-lg group-hover:scale-125 transition-transform">favorite</span>
+                                                        <span class="text-xs font-bold uppercase tracking-widest hidden sm:inline">Like</span>
+                                                    </button>
+                                                    <span class="text-white/20 text-xs font-bold uppercase tracking-widest ml-auto">@review.CreatedAt.ToString("MMM dd")</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 }
-                            </div>
-                            <div class="list-info">
-                                <h3>@list.Title</h3>
-                                <div class="list-meta">
-                                    <span>@list.Items.Count games</span>
-                                    <span>Updated @list.UpdatedAt.ToString("MMM dd")</span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                }
-            </div>
-        }
-        else
-        {
-            <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
-                No lists created yet.
-            </div>
-        }
-    </div>
-
-    <!-- Playing Tab -->
-    <div id="content-playing" class="tab-content" style="display: none;">
-        @await Html.PartialAsync("_GameGrid", Model.PlayingGames.Select(u => u.Game).ToList())
-    </div>
-
-    <!-- Backlog Tab -->
-    <div id="content-backlog" class="tab-content" style="display: none;">
-        @await Html.PartialAsync("_GameGrid", Model.BacklogGames.Select(u => u.Game).ToList())
-    </div>
-
-    <!-- Played Tab -->
-    <div id="content-played" class="tab-content" style="display: none;">
-        @await Html.PartialAsync("_GameGrid", Model.PlayedGames.Select(u => u.Game).ToList())
-    </div>
-
-    <!-- Likes Tab -->
-    <div id="content-likes" class="tab-content" style="display: none;">
-        @if (Model.LikedReviews.Any())
-        {
-            <div class="reviews-list">
-                @foreach (var like in Model.LikedReviews)
-                {
-                    <div class="review-card">
-                        <div class="review-avatar avatar-cyan">
-                            @like.Review.User?.UserName.Substring(0,1).ToUpper()
-                        </div>
-                        <div class="review-content">
-                            <div class="review-header">
-                                <span style="color: var(--text-secondary); font-size: 0.9rem;">Liked review by</span>
-                                <a href="/user/@like.Review.User?.UserName" class="reviewer-name">@like.Review.User?.UserName</a>
-                                <span style="color: var(--text-secondary); font-size: 0.9rem;">on</span>
-                                <a href="/game/@like.Review.Game?.Slug" class="game-link">@like.Review.Game?.Title</a>
-                            </div>
-                            <div class="review-stars">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="star @(i <= like.Review.Rating ? "filled" : "")">★</span>
-                                }
-                            </div>
-                            <p class="review-text">"@like.Review.Content"</p>
+                            } else {
+                                 <div class="p-6 bg-white/5 rounded-xl border border-white/10 text-white/40 text-sm italic">No reviews yet.</div>
+                            }
                         </div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-             <div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--bg-card); border-radius: 0.75rem; border: 1px dashed var(--border-color);">
-                No likes yet.
-            </div>
-        }
-    </div>
+                </div>
 
+                <!-- Reviews Tab Content (Full List) -->
+                <div id="content-reviews" class="tab-content hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <h2 class="text-white text-xl font-bold mb-6">All Reviews</h2>
+                    <div class="space-y-4">
+                        @foreach(var review in Model.Reviews) {
+                             <div class="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/[0.07] transition-all">
+                                <div class="flex items-start gap-4">
+                                    <a href="/game/@review.Game.Slug" class="w-16 aspect-[3/4] bg-cover rounded-md flex-shrink-0" style='background-image: url("@(string.IsNullOrEmpty(review.Game.ImagePath) ? "/images/placeholder_game.jpg" : review.Game.ImagePath)");'></a>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="text-white text-lg font-bold">@review.Game.Title</h3>
+                                            <div class="flex text-primary">
+                                                 @for (int i = 0; i < 5; i++) {
+                                                    double val = review.Rating - i;
+                                                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' @(val >= 1 ? 1 : 0)">@(val >= 1 ? "star" : (val >= 0.5 ? "star_half" : "star"))</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <p class="text-white/60 text-sm mt-2 leading-relaxed">"@review.Content"</p>
+                                        <div class="mt-4 text-right">
+                                             <span class="text-white/20 text-xs font-bold uppercase tracking-widest">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                         @if(!Model.Reviews.Any()) { <div class="text-white/40">No reviews found.</div> }
+                    </div>
+                </div>
+
+                <!-- Lists Tab Content -->
+                <div id="content-lists" class="tab-content hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+                     <h2 class="text-white text-xl font-bold mb-6">User Lists</h2>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach(var list in Model.Lists) {
+                            <a href="/list/details/@list.Id" class="group block bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-all">
+                                <div class="h-40 bg-black/40 relative">
+                                    @if(list.Items.Any()){
+                                        <div class="grid grid-cols-4 h-full">
+                                            @foreach(var item in list.Items.Take(4)){
+                                                <div class="bg-center bg-cover border-r border-black/50" style='background-image: url("@(string.IsNullOrEmpty(item.Game?.ImagePath)?"/images/placeholder_game.jpg":item.Game.ImagePath)")'></div>
+                                            }
+                                        </div>
+                                    } else {
+                                        <div class="flex items-center justify-center h-full text-white/20"><span class="material-symbols-outlined text-4xl">format_list_bulleted</span></div>
+                                    }
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="text-white font-bold group-hover:text-primary transition-colors truncate">@list.Title</h3>
+                                    <p class="text-white/40 text-xs font-bold uppercase tracking-wider mt-1">@list.Items.Count Games</p>
+                                </div>
+                            </a>
+                        }
+                        @if(!Model.Lists.Any()) { <div class="text-white/40">No lists created.</div> }
+                     </div>
+                </div>
+
+                <!-- Backlog Tab Content -->
+                <div id="content-backlog" class="tab-content hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
+                     <h2 class="text-white text-xl font-bold mb-6">Backlog</h2>
+                     @if(Model.BacklogGames.Any()) {
+                        @await Html.PartialAsync("_GameGrid", Model.BacklogGames.Select(g => g.Game).ToList())
+                     } else {
+                         <div class="text-white/40">Backlog is empty.</div>
+                     }
+                </div>
+
+            </div>
+
+            <!-- Right Column: Sidebar (Sticky) -->
+            <div class="w-full lg:w-80 flex flex-col gap-8 flex-shrink-0">
+                <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
+                    <h3 class="text-white text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">badge</span>
+                        Achievements
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <!-- Static placehodlers for now -->
+                        <div class="aspect-square bg-primary/20 border border-primary/50 rounded flex items-center justify-center text-primary" title="Pro Gamer">
+                            <span class="material-symbols-outlined">military_tech</span>
+                        </div>
+                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Reviewer">
+                            <span class="material-symbols-outlined">edit_note</span>
+                        </div>
+                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Speedrunner">
+                            <span class="material-symbols-outlined">bolt</span>
+                        </div>
+                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Completionist">
+                            <span class="material-symbols-outlined">trophy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
+                    <h3 class="text-white text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">group</span>
+                        Community Stats
+                    </h3>
+                    <!-- Using stats as we don't have mutual friends list yet -->
+                     <div class="flex flex-col gap-4">
+                        <div class="flex items-center gap-3">
+                             <span class="material-symbols-outlined text-white/20 text-3xl">diversity_3</span>
+                             <div>
+                                 <p class="text-white text-sm font-bold">@Model.FollowersCount Followers</p>
+                                 <p class="text-white/40 text-xs">Joined the community</p>
+                             </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                             <span class="material-symbols-outlined text-white/20 text-3xl">person_add</span>
+                             <div>
+                                 <p class="text-white text-sm font-bold">@Model.FollowingCount Following</p>
+                                 <p class="text-white/40 text-xs">Tracking</p>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
         function switchTab(tabName) {
-            // Hide all contents
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            // Show selected content
-            document.getElementById('content-' + tabName).style.display = 'block';
-            
-            // Deactivate all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.style.color = '#a0a0a0';
-                btn.style.borderBottomColor = 'transparent';
-                btn.classList.remove('active');
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
             });
-            // Activate selected button
+            
+            // Show selected content
+            const content = document.getElementById('content-' + tabName);
+            if(content) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+            }
+            
+            // Reset all buttons styling
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-primary', 'text-primary'); // Removed text-primary from replacement
+                btn.classList.add('border-transparent', 'text-white/50');
+                
+                // Specifically for children p tags if needed, but CSS class handles color
+            });
+
+            // Activate button
             const activeBtn = document.getElementById('tab-' + tabName);
-            activeBtn.style.color = '#fff';
-            activeBtn.style.borderBottomColor = 'var(--neon-cyan)';
-            activeBtn.classList.add('active');
+            if(activeBtn) {
+                activeBtn.classList.add('active'); // active class handles border and color via CSS in style block
+                activeBtn.classList.remove('border-transparent', 'text-white/50');
+            }
         }
     </script>
 }

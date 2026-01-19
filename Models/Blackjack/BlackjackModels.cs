@@ -42,4 +42,5 @@ public class BlackjackGame
     public bool IsGameOver { get; set; }
     public string Message { get; set; } = string.Empty;
     public string Winner { get; set; } = string.Empty; // "Player", "Dealer", "Push"
+    public int BetAmount { get; set; } = 100;
 }

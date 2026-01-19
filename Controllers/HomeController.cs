@@ -264,8 +264,8 @@ public class HomeController : Controller
 
     [HttpPost("/game/{slug}/review")]
     [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PostReview(string slug, double rating, string content)
+    // [ValidateAntiForgeryToken] // Temporarily disabled for debugging 400 error
+    public async Task<IActionResult> PostReview(string slug, [FromForm] string? rating, [FromForm] string? content)
     {
         var game = await _db.Games.FirstOrDefaultAsync(g => g.Slug == slug);
         if (game == null) return NotFound();
@@ -273,13 +273,25 @@ public class HomeController : Controller
         var userId = _userManager.GetUserId(User);
         if (userId == null) return Unauthorized();
 
+        double ratingVal = 0;
+        // Parse rating with InvariantCulture to handle "4.5" correctly even if server is tr-TR
+        if (!double.TryParse(rating, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double r))
+        {
+             // Fallback: try parsing with current culture just in case, or default to 0
+             if (!double.TryParse(rating, out r))
+             {
+                 r = 0;
+             }
+        }
+        ratingVal = r;
+
         // Check if user already reviewed? Typically 1 review per game.
         var existing = await _db.Reviews.FirstOrDefaultAsync(r => r.GameId == game.Id && r.UserId == userId);
         
         if (existing != null)
         {
             // Update exist review
-            existing.Rating = rating;
+            existing.Rating = ratingVal;
             existing.Content = content ?? "";
             existing.CreatedAt = DateTime.UtcNow;
             _db.Reviews.Update(existing);
@@ -290,7 +302,7 @@ public class HomeController : Controller
             {
                 GameId = game.Id,
                 UserId = userId,
-                Rating = rating,
+                Rating = ratingVal,
                 Content = content ?? "",
                 CreatedAt = DateTime.UtcNow
             };

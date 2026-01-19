@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using GameLoggd.Models.Games;
 using GameLoggd.Models.Poker;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using GameLoggd.Models;
 
 namespace GameLoggd.Controllers;
 
@@ -10,30 +12,44 @@ public class TexasHoldemController : Controller
     private const string SessionKey = "HoldemGame";
     private const int smallBlind = 10;
     private const int bigBlind = 20;
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public TexasHoldemController(UserManager<ApplicationUser> userManager)
+    {
+        _userManager = userManager;
+    }
 
     [HttpGet("/holdem")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(new TexasHoldemGame());
+        var user = await _userManager.GetUserAsync(User);
+        var game = new TexasHoldemGame();
+        if(user != null) {
+            game.PlayerChips = user.Credits;
+        }
+        return View(game);
     }
 
     [HttpPost("/holdem/start")]
-    public IActionResult Start()
+    public async Task<IActionResult> Start()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
         var game = LoadGame() ?? new TexasHoldemGame();
         
-        // Reset for new round but keep chips
-        int pChips = game.PlayerChips;
-        int dChips = game.DealerChips;
+        // Sync Chips from real balance
+        game.PlayerChips = user.Credits;
+        
+        // Ensure dealer has chips
+        if (game.DealerChips <= 0) game.DealerChips = 1000;
 
-        if (pChips < bigBlind || dChips < bigBlind)
+        if (game.PlayerChips < bigBlind)
         {
-             return BadRequest("Not enough chips");
+             return BadRequest("Not enough credits to play (need " + bigBlind + ")");
         }
 
         game.ResetRound();
-        game.PlayerChips = pChips;
-        game.DealerChips = dChips;
 
         // Dealing
         game.Deck = CreateDeck();
@@ -49,26 +65,31 @@ public class TexasHoldemController : Controller
         PostBlind(game, isPlayer: false, amount: bigBlind);
         
         game.CurrentBet = bigBlind;
-        game.IsPlayerTurn = true; // Small blind acts first pre-flop? No, Big blind acts last. 
-        // Heads up: Dealer is Small Blind. 
-        // Let's simplify: Player is always Dealer/Small Blind for now to act first?
-        // Standard Rules: Dealer is SB. Button is SB. 
-        // SB posts SB. BB posts BB. SB acts first Pre-Flop.
-        // Let's make Player SB.
+        game.IsPlayerTurn = true; 
         
         game.Message = "Your Turn (Pre-Flop)";
+        
+        // Sync back balance
+        user.Credits = game.PlayerChips;
+        await _userManager.UpdateAsync(user);
 
         SaveGame(game);
         return Json(ViewData(game));
     }
 
     [HttpPost("/holdem/action")]
-    public IActionResult Action([FromBody] string action) // check, call, fold, raise
+    public async Task<IActionResult> Action([FromBody] string action)
     {
         var game = LoadGame();
         if (game == null || game.Stage == HoldemStage.GameOver) return BadRequest("Game error");
+        
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+        // Force sync before action to be safe, though Session should be up to date
+        // Actually trusting session state for chips inside the hand is correct, 
+        // but let's ensure we don't cheat by double spending across tabs? 
+        // For simple single-seat, trusting session is fine.
 
-        // Player Action
         switch (action.ToLower())
         {
             case "fold":
@@ -79,7 +100,7 @@ public class TexasHoldemController : Controller
                 break;
             case "call":
                 int callAmt = game.CurrentBet - game.PlayerBet;
-                if (callAmt > game.PlayerChips) callAmt = game.PlayerChips; // All in
+                if (callAmt > game.PlayerChips) callAmt = game.PlayerChips; 
                 game.PlayerChips -= callAmt;
                 game.Pot += callAmt;
                 game.PlayerBet += callAmt;
@@ -90,7 +111,6 @@ public class TexasHoldemController : Controller
                 game.IsPlayerTurn = false;
                 break;
             case "raise":
-                // Fixed limit raise for simplicity? Or minimal 2x
                 int raiseAmt = (game.CurrentBet == 0 ? bigBlind : game.CurrentBet * 2) - game.PlayerBet;
                 if (raiseAmt > game.PlayerChips) raiseAmt = game.PlayerChips;
                 game.PlayerChips -= raiseAmt;
@@ -103,9 +123,12 @@ public class TexasHoldemController : Controller
 
         if (game.Stage != HoldemStage.GameOver && !game.IsPlayerTurn)
         {
-             // Bot Turn
              BotPlay(game);
         }
+        
+        // Sync back balance (wins or bets applied)
+        user.Credits = game.PlayerChips;
+        await _userManager.UpdateAsync(user);
         
         SaveGame(game);
         return Json(ViewData(game));
@@ -113,16 +136,11 @@ public class TexasHoldemController : Controller
 
     private void BotPlay(TexasHoldemGame game)
     {
-        // Simple logic
-        // If Player raised, Bot calls or folds.
-        // If Player checked, Bot checks.
-        
-        // Very basic AI
         int toCall = game.CurrentBet - game.DealerBet;
-        
         bool canCheck = toCall == 0;
         
-        // Random decision based on toCall
+        // Simple AI: 30% fold if raising, otherwise call/check.
+        Random rnd = new Random();
         if (canCheck)
         {
             // Check
@@ -133,13 +151,11 @@ public class TexasHoldemController : Controller
         {
             if (toCall > game.DealerChips) 
             {
-                // All in or Fold
-                game.DealerChips -= toCall; // Assuming all in covers or is covered logic simplified
-                game.Pot += toCall; // Bug here in real logic but acceptable for simple demo
+                game.DealerChips -= toCall; 
+                game.Pot += toCall; 
             }
             else
             {
-                // Call
                 game.DealerChips -= toCall;
                 game.Pot += toCall;
                 game.DealerBet += toCall;
@@ -153,7 +169,6 @@ public class TexasHoldemController : Controller
 
     private void NextStage(TexasHoldemGame game)
     {
-        // Reset bets for next stage
         game.PlayerBet = 0;
         game.DealerBet = 0;
         game.CurrentBet = 0;
@@ -187,10 +202,6 @@ public class TexasHoldemController : Controller
         var pBest = HoldemHandEvaluator.Evaluate(game.PlayerHoleCards, game.CommunityCards);
         var dBest = HoldemHandEvaluator.Evaluate(game.DealerHoleCards, game.CommunityCards);
 
-        // Compare pBest vs dBest
-        // We need a comparer in Evaluator or here
-        // Re-implement basic comparison here since Evaluator returns scorekey
-        
         int comparison = 0;
         if (pBest.Rank > dBest.Rank) comparison = 1;
         else if (pBest.Rank < dBest.Rank) comparison = -1;
@@ -231,7 +242,6 @@ public class TexasHoldemController : Controller
 
     private object ViewData(TexasHoldemGame game)
     {
-        // Hide dealer cards unless showdown
         var dealerCards = game.Stage == HoldemStage.Showdown || game.Stage == HoldemStage.GameOver 
             ? game.DealerHoleCards 
             : game.DealerHoleCards.Select(c => new Card { IsHidden = true }).ToList();

@@ -4,49 +4,82 @@
     ViewData["Title"] = "Add Games to " + Model.ListTitle;
 }
 
-<div class="page-container" style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
-    <div style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
-        <a asp-action="Details" asp-route-id="@Model.ListId" style="color: #888; text-decoration: none;">← Back to List</a>
-        <h1 style="margin: 0; font-size: 1.5rem;">Add Games to <span style="color: #ff304f;">@Model.ListTitle</span></h1>
-    </div>
-
-    <!-- Search Form -->
-    <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <form method="get" action="/list/@Model.ListId/add" style="display: flex; gap: 0.5rem;">
-            <input type="text" name="query" value="@Model.Query" placeholder="Search for games..." style="flex: 1; padding: 0.8rem; border-radius: 4px; border: 1px solid #333; background: #222; color: white;" autofocus />
-            <button type="submit" style="background: #444; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 4px; cursor: pointer;">Search</button>
-        </form>
-    </div>
-
-    <!-- Results -->
-    @if (!string.IsNullOrWhiteSpace(Model.Query))
-    {
-        <h2 style="margin-bottom: 1rem; font-size: 1.2rem; color: #ccc;">Search Results</h2>
+<div class="w-full min-h-screen pt-24 pb-12 px-4">
+    <div class="max-w-4xl mx-auto space-y-8">
         
-        @if (Model.Results.Any())
+        <!-- Header -->
+        <div class="space-y-4">
+            <a asp-action="Details" asp-route-id="@Model.ListId" class="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider group">
+                <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                Back to List
+            </a>
+            
+            <div class="flex flex-col gap-2">
+                <h1 class="text-3xl md:text-4xl font-bold font-display text-white tracking-tighter">
+                    Add Games to <span class="text-primary">@Model.ListTitle</span>
+                </h1>
+                <p class="text-white/50 font-medium">Search for games to expand your collection.</p>
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+            <form method="get" action="/list/@Model.ListId/add" class="flex gap-4">
+                <div class="relative flex-1">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30">search</span>
+                    <input type="text" name="query" value="@Model.Query" placeholder="Search for games..." class="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-primary focus:bg-white/5 hover:border-white/30 transition-all font-medium placeholder:text-white/20" autofocus />
+                </div>
+                <button type="submit" class="bg-white/10 hover:bg-white/20 text-white font-bold uppercase tracking-wider px-8 rounded-xl transition-all border border-white/10 hidden md:block">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Results -->
+        @if (!string.IsNullOrWhiteSpace(Model.Query))
         {
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                @foreach (var game in Model.Results)
+            <div class="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-white/10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-white/50">Search Results</span>
+                </div>
+                
+                @if (Model.Results.Any())
                 {
-                    <div style="display: flex; align-items: center; gap: 1rem; background: #1a1a1a; padding: 1rem; border-radius: 8px;">
-                        <img src="@(game.ImagePath ?? "/images/placeholder_game.jpg")" style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;" />
-                        <div style="flex: 1;">
-                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">@game.Title</h3>
-                            <span style="color: #666; font-size: 0.9rem;">@(game.Year?.ToString() ?? "—")</span>
-                        </div>
-                        <form asp-action="AddGame" method="post">
-                            <input type="hidden" name="listId" value="@Model.ListId" />
-                            <input type="hidden" name="gameId" value="@game.Id" />
-                            <input type="hidden" name="returnUrl" value="/list/@Model.ListId/add?query=@Model.Query" />
-                            <button type="submit" style="background: #ff304f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Add</button>
-                        </form>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach (var game in Model.Results)
+                        {
+                            <div class="bg-black/40 border border-white/5 rounded-xl p-4 flex gap-4 group hover:border-white/20 hover:bg-white/5 transition-all">
+                                <img src="@(game.ImagePath ?? "/images/placeholder_game.jpg")" class="w-20 h-[120px] object-cover rounded-lg shadow-lg" />
+                                
+                                <div class="flex-1 flex flex-col justify-between py-1">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-white leading-tight group-hover:text-primary transition-colors line-clamp-2">@game.Title</h3>
+                                        <span class="text-xs font-bold font-mono text-white/40 mt-1 block">@(game.Year?.ToString() ?? "—")</span>
+                                    </div>
+
+                                    <form asp-action="AddGame" method="post" class="flex justify-end">
+                                        <input type="hidden" name="listId" value="@Model.ListId" />
+                                        <input type="hidden" name="gameId" value="@game.Id" />
+                                        <input type="hidden" name="returnUrl" value="/list/@Model.ListId/add?query=@Model.Query" />
+                                        
+                                        <button type="submit" class="bg-white/10 hover:bg-primary hover:text-black text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">add_circle</span>
+                                            Add to List
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-white/5">
+                        <span class="material-symbols-outlined text-4xl text-white/20 mb-2">search_off</span>
+                        <p class="text-white/50 font-medium">No games found matching "<span class="text-white">@Model.Query</span>"</p>
                     </div>
                 }
             </div>
         }
-        else
-        {
-            <p style="color: #666;">No games found matching "@Model.Query"</p>
-        }
-    }
+    </div>
 </div>

@@ -4,232 +4,95 @@
     ViewData["Title"] = "Video Poker";
 }
 
-<style>
-    .poker-machine {
-        background-color: #050505;
-        background-image: 
-            linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-        background-size: 30px 30px;
-        border-radius: 1rem;
-        border: 2px solid var(--neon-cyan);
-        box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 50px rgba(0,0,0,0.8);
-        padding: 2rem;
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        font-family: 'Courier New', monospace;
-    }
-
-    .paytable {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        border-bottom: 1px solid #333;
-        padding-bottom: 1rem;
-    }
-
-    .pay-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .pay-rank { color: var(--neon-purple); font-weight: bold; }
-    .pay-val { color: #fff; }
-
-    .poker-cards {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        perspective: 1000px;
-        margin-bottom: 2rem;
-    }
-
-    .poker-card-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-    }
-
-    /* Reuse Blackjack card styles or redefine slightly */
-    .pk-card {
-        width: 100px;
-        height: 140px;
-        background: #111;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        position: relative;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: 2px solid #333;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    }
-
-    .pk-card.red { color: #ff0055; border-color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
-    .pk-card.black { color: #00e5ff; border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+<div class="w-full min-h-screen pt-24 pb-12 px-4 flex flex-col items-center">
     
-    .pk-card .center-suit { font-size: 3rem; }
-    .pk-card .corner-top { position: absolute; top: 5px; left: 5px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; }
-    .pk-card .corner-bottom { position: absolute; bottom: 5px; right: 5px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; transform: rotate(180deg); }
+    <!-- Game Logo -->
+    <div class="mb-8 text-center space-y-2 animate-slide-in-up">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-cyan/20 border border-accent-cyan/50 text-4xl mb-4 shadow-[0_0_30px_rgba(34,211,238,0.3)]">
+            ♦️
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black font-display text-white tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+            Video Poker
+        </h1>
+    </div>
 
-    /* Held state */
-    .poker-card-container.held .pk-card {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 20px rgba(255, 235, 59, 0.3);
-        border-color: #ffeb3b;
-    }
+    <!-- Game Table -->
+    <div class="w-full max-w-5xl bg-[#050505] border border-accent-cyan/30 rounded-3xl p-4 md:p-8 relative overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.15)] flex flex-col min-h-[600px]">
+        
+        <!-- Background Decorations -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 50% 50%, rgba(34,211,238,0.1) 0%, transparent 50%);"></div>
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-cyan to-transparent opacity-50"></div>
 
-    .hold-badge {
-        background: #333;
-        color: #555;
-        padding: 5px 15px;
-        border-radius: 4px;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-
-    .poker-card-container.held .hold-badge {
-        background: #ffeb3b;
-        color: #000;
-        box-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
-    }
-
-    .game-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 2rem;
-        background: rgba(0,0,0,0.5);
-        border-radius: 8px;
-        margin-top: auto;
-    }
-
-    .credits-display {
-        font-size: 1.5rem;
-        color: #00ff88;
-        text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-    }
-
-    .controls {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    .pk-btn {
-        padding: 1rem 3rem;
-        font-size: 1.2rem;
-        text-transform: uppercase;
-        cursor: pointer;
-        border: none;
-        font-weight: bold;
-        border-radius: 4px;
-        transition: all 0.2s;
-    }
-
-    .btn-deal { 
-        background: var(--neon-cyan); 
-        color: black; 
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); 
-    }
-    
-    .btn-draw { 
-        background: var(--neon-purple); 
-        color: white; 
-        box-shadow: 0 0 15px rgba(184, 48, 255, 0.4); 
-    }
-
-    .btn-bet {
-        background: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-    }
-
-    .message-area {
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: #fff;
-        text-shadow: 0 0 10px rgba(255,255,255,0.5);
-    }
-    
-    .message-area.win {
-        color: #ffeb3b; 
-        text-shadow: 0 0 10px #ffeb3b;
-        animation: pulse 1s infinite;
-    }
-
-    @@keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-</style>
-
-<div class="page-container">
-    <h1 class="logo" style="text-align: center; font-size: 3rem; margin-bottom: 2rem;">Video Poker</h1>
-
-    <div class="poker-machine">
-        <div class="paytable">
-            <div class="pay-item"><span class="pay-rank">ROYAL FLUSH</span><span class="pay-val">800</span></div>
-            <div class="pay-item"><span class="pay-rank">STR. FLUSH</span><span class="pay-val">50</span></div>
-            <div class="pay-item"><span class="pay-rank">4 OF A KIND</span><span class="pay-val">25</span></div>
-            <div class="pay-item"><span class="pay-rank">FULL HOUSE</span><span class="pay-val">9</span></div>
-            <div class="pay-item"><span class="pay-rank">FLUSH</span><span class="pay-val">6</span></div>
-            <div class="pay-item"><span class="pay-rank">STRAIGHT</span><span class="pay-val">4</span></div>
-            <div class="pay-item"><span class="pay-rank">3 OF A KIND</span><span class="pay-val">3</span></div>
-            <div class="pay-item"><span class="pay-rank">TWO PAIR</span><span class="pay-val">2</span></div>
-            <div class="pay-item"><span class="pay-rank">JACKS OR BETTER</span><span class="pay-val">1</span></div>
+        <!-- Paytable -->
+        <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 mb-8 p-4 bg-white/5 rounded-xl border border-white/10 text-[0.6rem] md:text-xs">
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">ROYAL FLUSH</span><span class="text-white font-mono">800</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">STR. FLUSH</span><span class="text-white font-mono">50</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">4 OF A KIND</span><span class="text-white font-mono">25</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">FULL HOUSE</span><span class="text-white font-mono">9</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">FLUSH</span><span class="text-white font-mono">6</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">STRAIGHT</span><span class="text-white font-mono">4</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">3 OF A KIND</span><span class="text-white font-mono">3</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">TWO PAIR</span><span class="text-white font-mono">2</span></div>
+            <div class="flex flex-col items-center p-2 rounded hover:bg-white/5 transition-colors"><span class="text-accent-purple font-black">JACKS+</span><span class="text-white font-mono">1</span></div>
         </div>
 
-        <div class="message-area" id="game-message">GOOD LUCK</div>
-
-        <div class="poker-cards" id="cards-area">
-            <!-- Cards 0-4 -->
-            @for(int i=0; i<5; i++) {
-                <div class="poker-card-container" id="card-container-@i" onclick="toggleHold(@i)">
-                    <div class="pk-card" id="card-@i">
-                        <div class="center-suit">?</div>
-                    </div>
-                    <div class="hold-badge" id="badge-@i">HOLD</div>
+        <!-- Message Overlay -->
+        <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden" id="game-message-overlay">
+            <div class="text-center space-y-6 animate-zoom-in">
+                <h2 class="text-5xl md:text-7xl font-black font-display text-white tracking-tighter italic drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]" id="result-text">
+                    WINNER!
+                </h2>
+                <div class="pt-4">
+                    <button class="px-8 py-4 bg-accent-cyan text-black font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all flex items-center gap-2 mx-auto" onclick="closeOverlay()">
+                        Continue
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
                 </div>
-            }
-        </div>
-
-        <div class="game-info">
-            <div class="bet-controls">
-                <button class="pk-btn btn-bet" onclick="changeBet(-1)">-</button>
-                <span class="credits-display" style="font-size:1.2rem; margin:0 1rem;">BET: <span id="bet-display">1</span></span>
-                <button class="pk-btn btn-bet" onclick="changeBet(1)">+</button>
-            </div>
-            <div class="credits-info">
-                CREDITS: <span class="credits-display" id="credits-display">@Model.Credits</span>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="pk-btn btn-deal" id="btn-deal" onclick="deal()">DEAL</button>
-            <button class="pk-btn btn-draw" id="btn-draw" onclick="draw()" style="display:none;">DRAW</button>
+        <!-- Cards Area -->
+        <div class="flex-1 flex items-center justify-center my-8">
+            <div class="flex justify-center gap-2 md:gap-4 perspective-[1000px]" id="cards-area">
+                @for(int i=0; i<5; i++) {
+                    <div class="flex flex-col items-center gap-4 cursor-pointer group transition-all duration-300" id="card-container-@i" onclick="toggleHold(@i)">
+                        <div id="card-@i" class="w-20 h-28 md:w-32 md:h-44 bg-[#1a1a1a] rounded-xl border-2 border-white/10 flex items-center justify-center shadow-xl relative overflow-hidden group-hover:border-white/30 transition-all">
+                             <div class="text-4xl text-white/20 font-display">?</div>
+                        </div>
+                        <div class="px-3 py-1 rounded-full bg-black border border-white/10 text-[0.6rem] font-bold uppercase tracking-widest text-white/30 transition-all" id="badge-@i">Hold</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="mt-auto bg-black/40 border-t border-white/10 p-4 md:p-6 rounded-b-3xl -mx-4 -mb-4 md:-mx-8 md:-mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Bet Controls -->
+            <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                <span class="text-xs font-bold uppercase text-white/50 tracking-wider">Bet</span>
+                <div class="flex items-center gap-2">
+                    <button class="w-8 h-8 rounded-lg bg-black/50 border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-colors" onclick="changeBet(-1)">-</button>
+                    <span class="text-xl font-mono font-bold text-accent-cyan w-8 text-center" id="bet-display">1</span>
+                    <button class="w-8 h-8 rounded-lg bg-black/50 border border-white/10 hover:border-white/30 text-white flex items-center justify-center transition-colors" onclick="changeBet(1)">+</button>
+                </div>
+            </div>
+
+            <!-- Credits -->
+            <div class="flex flex-col items-center">
+                <span class="text-[0.6rem] font-bold uppercase text-white/30 tracking-[0.2em]">Credits</span>
+                <span class="text-2xl font-mono font-bold text-primary drop-shadow-[0_0_10px_rgba(13,242,51,0.3)] min-w-[3rem] text-center" id="credits-display">@Model.Credits</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button class="px-8 py-3 bg-accent-cyan text-black font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all min-w-[140px]" id="btn-deal" onclick="deal()">
+                    Deal
+                </button>
+                <button class="px-8 py-3 bg-accent-purple text-white font-black uppercase tracking-widest rounded-xl hover:bg-white hover:text-black hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all hidden min-w-[140px]" id="btn-draw" onclick="draw()">
+                    Draw
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -241,7 +104,7 @@
         let canDraw = false;
 
         function changeBet(delta) {
-            if (canDraw) return; // Can't change bet during hand
+            if (canDraw) return;
             currentBet += delta;
             if (currentBet < 1) currentBet = 1;
             if (currentBet > 5) currentBet = 5;
@@ -256,24 +119,40 @@
 
         function updateHoldUI(index) {
             const container = document.getElementById(`card-container-${index}`);
+            const badge = document.getElementById(`badge-${index}`);
+            const card = document.getElementById(`card-${index}`);
+
             if (heldCards[index]) {
-                container.classList.add('held');
+                // Active Hold State
+                badge.classList.remove('bg-black', 'border-white/10', 'text-white/30');
+                badge.classList.add('bg-yellow-400', 'border-yellow-400', 'text-black', 'shadow-[0_0_15px_rgba(250,204,21,0.4)]');
+                
+                card.classList.add('border-yellow-400', 'shadow-[0_0_20px_rgba(250,204,21,0.2)]', '-translate-y-2');
+                card.classList.remove('border-white/10');
             } else {
-                container.classList.remove('held');
+                // Inactive State
+                badge.classList.add('bg-black', 'border-white/10', 'text-white/30');
+                badge.classList.remove('bg-yellow-400', 'border-yellow-400', 'text-black', 'shadow-[0_0_15px_rgba(250,204,21,0.4)]');
+                
+                card.classList.remove('border-yellow-400', 'shadow-[0_0_20px_rgba(250,204,21,0.2)]', '-translate-y-2');
+                card.classList.add('border-white/10');
             }
         }
 
-        function renderCardUI(index, card) {
-            const el = document.getElementById(`card-${index}`);
-             if (!card || card.suit === undefined) {
-                 // Hidden or back
-                 el.className = 'pk-card';
-                 el.innerHTML = '<div class="center-suit">?</div>';
-                 return;
-             }
+        function createCardHtml(card, index, isNew) {
+            const animationClass = isNew ? 'animate-flip-in-y' : '';
+            const styleDelay = isNew ? `animation-delay: ${index * 100}ms; animation-fill-mode: backwards;` : '';
+
+            if (!card || card.suit === undefined) {
+                 return `<div id="card-${index}" class="w-20 h-28 md:w-32 md:h-44 bg-[#1a1a1a] rounded-xl border-2 border-white/10 flex items-center justify-center shadow-xl relative overflow-hidden ${animationClass}" style="${styleDelay}">
+                             <div class="text-4xl text-white/20 font-display">?</div>
+                        </div>`;
+            }
 
             const isRed = card.suit === 0 || card.suit === 1; 
-            const colorClass = isRed ? 'red' : 'black';
+            const colorClass = isRed ? 'text-red-500 border-red-500/30' : 'text-accent-cyan border-accent-cyan/30';
+            const shadowClass = isRed ? 'shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'shadow-[0_0_15px_rgba(34,211,238,0.15)]';
+            
             const suits = ['♥', '♦', '♣', '♠'];
             const suitSymbol = suits[card.suit];
             
@@ -283,17 +162,38 @@
             else if (card.rank === 13) rankStr = 'K';
             else if (card.rank === 14) rankStr = 'A';
 
-            el.className = `pk-card ${colorClass}`;
-            el.innerHTML = `
-                <div class="corner-top"><span>${rankStr}</span><span>${suitSymbol}</span></div>
-                <div class="center-suit">${suitSymbol}</div>
-                <div class="corner-bottom"><span>${rankStr}</span><span>${suitSymbol}</span></div>
-            `;
+            return `<div id="card-${index}" class="w-20 h-28 md:w-32 md:h-44 bg-[#151515] rounded-xl border-2 flex flex-col items-center justify-center relative ${colorClass} ${shadowClass} ${animationClass}" style="${styleDelay}">
+                        <div class="absolute top-2 left-2 flex flex-col items-center text-sm font-bold leading-none">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
+                        <div class="text-5xl drop-shadow-md">${suitSymbol}</div>
+                        <div class="absolute bottom-2 right-2 flex flex-col items-center text-sm font-bold leading-none rotate-180">
+                            <span>${rankStr}</span>
+                            <span>${suitSymbol}</span>
+                        </div>
+                    </div>`;
+        }
+
+        function renderCardUI(index, card, isNew) {
+            const oldCard = document.getElementById(`card-${index}`);
+            const newHtml = createCardHtml(card, index, isNew);
+            
+            // Replace the card element (keeping the container wrapper)
+            if(oldCard) {
+                oldCard.outerHTML = newHtml;
+            } else {
+                 // Fallback if structure is broken
+                 const container = document.getElementById(`card-container-${index}`);
+                 container.innerHTML = newHtml + `<div class="px-3 py-1 rounded-full bg-black border border-white/10 text-[0.6rem] font-bold uppercase tracking-widest text-white/30 transition-all" id="badge-${index}">Hold</div>`;
+            }
+            
+            // Maintain hold visual state if drawing
+            if (canDraw) updateHoldUI(index);
         }
 
         async function deal() {
             try {
-                // Reset holds
                 heldCards = [false, false, false, false, false];
                 for(let i=0; i<5; i++) updateHoldUI(i);
 
@@ -310,16 +210,12 @@
 
                 const data = await response.json();
                 
-                // Update UI
                 document.getElementById('credits-display').innerText = data.credits;
-                data.hand.forEach((c, i) => renderCardUI(i, c));
+                data.hand.forEach((c, i) => renderCardUI(i, c, true));
                 
-                document.getElementById('game-message').innerText = "HOLD cards to keep, then DRAW.";
-                document.getElementById('game-message').className = "message-area";
-
                 canDraw = true;
-                document.getElementById('btn-deal').style.display = 'none';
-                document.getElementById('btn-draw').style.display = 'block';
+                document.getElementById('btn-deal').classList.add('hidden');
+                document.getElementById('btn-draw').classList.remove('hidden');
 
             } catch (err) { console.error(err); }
         }
@@ -334,24 +230,42 @@
                 
                 const data = await response.json();
                 
-                // Update UI
                 document.getElementById('credits-display').innerText = data.credits;
-                data.hand.forEach((c, i) => renderCardUI(i, c));
+                // Animate only replaced cards
+                data.hand.forEach((c, i) => renderCardUI(i, c, !heldCards[i]));
                 
-                document.getElementById('game-message').innerText = data.message;
                 if (data.payout > 0) {
-                     document.getElementById('game-message').className = "message-area win";
+                     setTimeout(() => showOverlay(`WIN: ${data.payout}`), 1000);
+                } else {
+                     setTimeout(() => showOverlay("GAME OVER"), 1000);
                 }
 
                 canDraw = false;
-                document.getElementById('btn-deal').style.display = 'block';
-                document.getElementById('btn-draw').style.display = 'none';
+                document.getElementById('btn-deal').classList.remove('hidden');
+                document.getElementById('btn-draw').classList.add('hidden');
                 
-                // Reset holds visually for next game (but data is reset in deal)
-                 heldCards = [false, false, false, false, false];
-                 for(let i=0; i<5; i++) updateHoldUI(i);
+                // Clear hold UI
+                heldCards = [false, false, false, false, false];
+                for(let i=0; i<5; i++) {
+                     const badge = document.getElementById(`badge-${i}`);
+                     badge.classList.add('bg-black', 'border-white/10', 'text-white/30');
+                     badge.classList.remove('bg-yellow-400', 'border-yellow-400', 'text-black', 'shadow-[0_0_15px_rgba(250,204,21,0.4)]');
+                }
 
             } catch (err) { console.error(err); }
+        }
+
+        function showOverlay(msg) {
+            const ol = document.getElementById('game-message-overlay');
+            document.getElementById('result-text').innerText = msg;
+            ol.classList.remove('hidden');
+            ol.classList.add('flex');
+        }
+
+        function closeOverlay() {
+            const ol = document.getElementById('game-message-overlay');
+            ol.classList.add('hidden');
+            ol.classList.remove('flex');
         }
     </script>
 }

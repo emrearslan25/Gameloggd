@@ -2,128 +2,216 @@
 @{
     var mode = (ViewData["Mode"] as string) ?? "login";
     var returnUrl = (ViewData["ReturnUrl"] as string) ?? string.Empty;
-    ViewData["Title"] = "Account";
+    ViewData["Title"] = "Access System";
 }
 
-<div class="auth-page">
-    <div class="auth-shell">
-        <div class="auth-brand">
-            <div class="auth-logo">GameLoggd</div>
-            <div class="auth-tagline">Track, rate, and share your backlog.</div>
+<div class="min-h-[calc(100vh-80px)] w-full flex items-center justify-center relative overflow-hidden py-12">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none"></div>
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="w-full max-w-md relative z-10 mx-4">
+        <!-- Logo/Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-4xl text-primary animate-pulse">terminal</span>
+                <h1 class="text-4xl font-display font-black text-white tracking-tighter">GAMELOG</h1>
+            </div>
+            <p class="text-white/40 font-mono text-sm uppercase tracking-widest">System Access Required</p>
         </div>
 
-        <div class="auth-card">
-            <div class="auth-tabs" role="tablist" aria-label="Authentication">
-                <button
-                    type="button"
-                    class="auth-tab @(mode == "login" ? "is-active" : "")"
-                    data-auth-tab="login"
-                    role="tab"
-                    aria-selected="@(mode == "login" ? "true" : "false")">
-                    Sign in
+        <!-- Main Card -->
+        <div class="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Tabs -->
+            <div class="grid grid-cols-2 border-b border-white/5">
+                <button onclick="switchAuthMode('login')" 
+                        id="tab-login"
+                        class="py-4 text-sm font-bold uppercase tracking-wider transition-all duration-300 @(mode == "login" ? "bg-white/5 text-primary border-b-2 border-primary" : "text-white/40 hover:text-white hover:bg-white/5 border-b-2 border-transparent")">
+                    Sign In
                 </button>
-                <button
-                    type="button"
-                    class="auth-tab @(mode == "register" ? "is-active" : "")"
-                    data-auth-tab="register"
-                    role="tab"
-                    aria-selected="@(mode == "register" ? "true" : "false")">
-                    Create account
+                <button onclick="switchAuthMode('register')" 
+                        id="tab-register"
+                        class="py-4 text-sm font-bold uppercase tracking-wider transition-all duration-300 @(mode == "register" ? "bg-white/5 text-primary border-b-2 border-primary" : "text-white/40 hover:text-white hover:bg-white/5 border-b-2 border-transparent")">
+                    Initialize
                 </button>
             </div>
 
-            <div class="auth-body">
-                <div class="auth-panel @(mode == "login" ? "is-active" : "")" data-auth-panel="login" role="tabpanel">
-                    <h2>Welcome back</h2>
-                    <p class="auth-sub">Sign in to continue.</p>
-
-                    <form method="post" action="/account/login" class="auth-form">
+            <!-- Forms Container -->
+            <div class="p-8">
+                <!-- Login Form -->
+                <div id="panel-login" class="@(mode == "login" ? "block animate-in fade-in slide-in-from-left-4 duration-500" : "hidden")">
+                    <form method="post" action="/account/login" class="flex flex-col gap-5">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="returnUrl" value="@returnUrl" />
 
-                        <div class="auth-error">
-                            @Html.ValidationSummary(excludePropertyErrors: true)
+                        @if (!ViewData.ModelState.IsValid && mode == "login")
+                        {
+                            <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-xs font-bold">
+                                @Html.ValidationSummary(excludePropertyErrors: true)
+                            </div>
+                        }
+
+                        <div class="space-y-1">
+                            <label for="login_identifier" class="text-white/60 text-xs font-bold uppercase tracking-wider">Identifier</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-primary transition-colors">person</span>
+                                <input id="login_identifier" name="Identifier" value="@Model.Login.Identifier" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="Username or Email" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("Identifier")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="login_identifier">Email or username</label>
-                            <input id="login_identifier" name="Identifier" value="@Model.Login.Identifier" placeholder="alexchen or alex@domain.com" />
-                            <span class="auth-error">@Html.ValidationMessage("Identifier")</span>
+                        <div class="space-y-1">
+                            <label for="login_password" class="text-white/60 text-xs font-bold uppercase tracking-wider">Passkey</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-primary transition-colors">key</span>
+                                <input id="login_password" name="Password" type="password" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-primary focus:ring-1 focus:ring-primary focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="••••••••" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("Password")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="login_password">Password</label>
-                            <input id="login_password" name="Password" type="password" placeholder="••••••••" />
-                            <span class="auth-error">@Html.ValidationMessage("Password")</span>
-                        </div>
-
-                        <div class="auth-row">
-                            <label class="auth-check">
-                                <input type="checkbox" name="RememberMe" value="true" />
-                                <span>Remember me</span>
+                        <div class="flex items-center justify-between mt-2">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" name="RememberMe" value="true" class="rounded bg-white/10 border-white/20 text-primary focus:ring-primary/50 cursor-pointer" />
+                                <span class="text-white/40 text-xs font-bold group-hover:text-white transition-colors">Remember me</span>
                             </label>
-                            <a class="auth-link" href="#" tabindex="-1">Forgot password?</a>
+                            <a href="#" class="text-primary/60 hover:text-primary text-xs font-bold transition-colors">Lost Access?</a>
                         </div>
 
-                        <button class="auth-submit" type="submit">Sign in</button>
-
-                        <div class="auth-foot">
-                            <span>New here?</span>
-                            <a class="auth-link" href="/account?mode=register" data-auth-switch="register">Create an account</a>
-                        </div>
+                        <button type="submit" class="w-full py-3 bg-primary text-background-dark font-black uppercase tracking-widest rounded-lg hover:bg-white hover:text-black transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(13,242,51,0.2)] hover:shadow-[0_0_30px_rgba(13,242,51,0.4)] mt-4">
+                            Connect
+                        </button>
                     </form>
                 </div>
 
-                <div class="auth-panel @(mode == "register" ? "is-active" : "")" data-auth-panel="register" role="tabpanel">
-                    <h2>Create your account</h2>
-                    <p class="auth-sub">Join your friends and start logging.</p>
-
-                    <form method="post" action="/account/register" class="auth-form">
+                <!-- Register Form -->
+                <div id="panel-register" class="@(mode == "register" ? "block animate-in fade-in slide-in-from-right-4 duration-500" : "hidden")">
+                    <form method="post" action="/account/register" class="flex flex-col gap-5">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="returnUrl" value="@returnUrl" />
 
-                        <div class="auth-error">
-                            @Html.ValidationSummary(excludePropertyErrors: true)
+                         @if (!ViewData.ModelState.IsValid && mode == "register")
+                        {
+                            <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-xs font-bold">
+                                @Html.ValidationSummary(excludePropertyErrors: true)
+                            </div>
+                        }
+
+                        <div class="space-y-1">
+                            <label for="reg_username" class="text-white/60 text-xs font-bold uppercase tracking-wider">Username</label>
+                             <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-accent-cyan transition-colors">badge</span>
+                                <input id="reg_username" name="Username" value="@Model.Register.Username" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="Display Name" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("Username")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="reg_username">Username</label>
-                            <input id="reg_username" name="Username" value="@Model.Register.Username" placeholder="alexchen" />
-                            <span class="auth-error">@Html.ValidationMessage("Username")</span>
+                        <div class="space-y-1">
+                            <label for="reg_email" class="text-white/60 text-xs font-bold uppercase tracking-wider">Email Communication</label>
+                             <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-accent-cyan transition-colors">mail</span>
+                                <input id="reg_email" name="Email" value="@Model.Register.Email" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="user@network.com" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("Email")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="reg_email">Email</label>
-                            <input id="reg_email" name="Email" value="@Model.Register.Email" placeholder="alex@domain.com" />
-                            <span class="auth-error">@Html.ValidationMessage("Email")</span>
+                        <div class="space-y-1">
+                            <label for="reg_password" class="text-white/60 text-xs font-bold uppercase tracking-wider">Passkey Sequence</label>
+                            <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-accent-cyan transition-colors">lock</span>
+                                <input id="reg_password" name="Password" type="password" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="Min 8 chars" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("Password")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="reg_password">Password</label>
-                            <input id="reg_password" name="Password" type="password" placeholder="Minimum 8 characters" />
-                            <span class="auth-error">@Html.ValidationMessage("Password")</span>
+                        <div class="space-y-1">
+                            <label for="reg_confirm" class="text-white/60 text-xs font-bold uppercase tracking-wider">Verify Passkey</label>
+                             <div class="relative group">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-white/20 group-focus-within:text-accent-cyan transition-colors">lock_reset</span>
+                                <input id="reg_confirm" name="ConfirmPassword" type="password" 
+                                       class="w-full bg-white/5 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/20 focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan focus:bg-white/10 transition-all outline-none font-mono text-sm"
+                                       placeholder="Repeat sequence" />
+                            </div>
+                            <span class="text-red-400 text-[10px] font-bold">@Html.ValidationMessage("ConfirmPassword")</span>
                         </div>
 
-                        <div class="auth-field">
-                            <label for="reg_confirm">Confirm password</label>
-                            <input id="reg_confirm" name="ConfirmPassword" type="password" placeholder="Repeat password" />
-                            <span class="auth-error">@Html.ValidationMessage("ConfirmPassword")</span>
-                        </div>
-
-                        <button class="auth-submit" type="submit">Create account</button>
-
-                        <div class="auth-foot">
-                            <span>Already have an account?</span>
-                            <a class="auth-link" href="/account?mode=login" data-auth-switch="login">Sign in</a>
-                        </div>
+                        <button type="submit" class="w-full py-3 bg-accent-cyan text-background-dark font-black uppercase tracking-widest rounded-lg hover:bg-white hover:text-black transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] mt-4">
+                            Initialize Account
+                        </button>
                     </form>
                 </div>
             </div>
+            
+            <!-- Footer text -->
+            <div class="bg-white/5 p-4 text-center border-t border-white/5">
+                 <p class="text-white/30 text-[10px] font-mono">SECURE CONNECTION ESTABLISHED // V.2.0.4</p>
+            </div>
         </div>
-
+        
     </div>
 </div>
 
 @section Scripts {
-    <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script>
+        function switchAuthMode(mode) {
+             // Panels
+            const loginPanel = document.getElementById('panel-login');
+            const registerPanel = document.getElementById('panel-register');
+            
+            // Tabs
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+
+            if (mode === 'login') {
+                loginPanel.classList.remove('hidden');
+                loginPanel.classList.add('block');
+                registerPanel.classList.add('hidden');
+                registerPanel.classList.remove('block');
+
+                // Update URL without reload
+                history.pushState(null, '', '/account?mode=login');
+
+                // Styling
+                loginTab.classList.add('bg-white/5', 'text-primary', 'border-primary');
+                loginTab.classList.remove('text-white/40', 'border-transparent');
+                
+                registerTab.classList.remove('bg-white/5', 'text-primary', 'border-primary');
+                registerTab.classList.add('text-white/40', 'border-transparent');
+            } else {
+                loginPanel.classList.add('hidden');
+                loginPanel.classList.remove('block');
+                registerPanel.classList.remove('hidden');
+                registerPanel.classList.add('block');
+
+                 // Update URL without reload
+                history.pushState(null, '', '/account?mode=register');
+
+                // Styling
+                registerTab.classList.add('bg-white/5', 'text-primary', 'border-primary'); // Using primary or accent-cyan? using primary for active tab state consistency, but buttons use different colors.
+                // Let's make the register tab use Cyan if active? 
+                // Simple consistency: Use Login style (Primary) for active state generally, but let's stick to the conditional classes I wrote above if I can... 
+                // Wait, in my HTML I used conditional razor syntax for initial state.
+                // In JS I need to match that.
+                
+                // My JS above uses primary for both which is fine.
+                // Actually, let's just swap classes precisely.
+                
+                loginTab.classList.remove('bg-white/5', 'text-primary', 'border-primary');
+                loginTab.classList.add('text-white/40', 'border-transparent');
+
+                registerTab.classList.add('bg-white/5', 'text-primary', 'border-primary');
+                registerTab.classList.remove('text-white/40', 'border-transparent');
+            }
+        }
+    </script>
 }

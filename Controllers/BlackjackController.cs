@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using GameLoggd.Models.Blackjack;
 using GameLoggd.Models.Games;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using GameLoggd.Models;
 
 namespace GameLoggd.Controllers;
 
@@ -9,17 +11,40 @@ public class BlackjackController : Controller
 {
     // In a real app, use distributed cache like Redis. For this demo, using Session.
     private const string SessionKey = "BlackjackGame";
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public BlackjackController(UserManager<ApplicationUser> userManager)
+    {
+        _userManager = userManager;
+    }
 
     [HttpGet("/blackjack")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(new BlackjackGame()); // Start with empty/new game view structure
+        var user = await _userManager.GetUserAsync(User);
+        if (user != null) ViewBag.Credits = user.Credits;
+        return View(new BlackjackGame()); 
     }
 
     [HttpPost("/blackjack/start")]
-    public IActionResult Start()
+    public async Task<IActionResult> Start()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        // Fixed bet for now, or get from request (later)
+        int betAmount = 100;
+        if (user.Credits < betAmount)
+        {
+            return BadRequest($"Not enough credits. You need {betAmount} credits.");
+        }
+
+        // Deduct bet immediately
+        user.Credits -= betAmount;
+        await _userManager.UpdateAsync(user);
+
         var game = new BlackjackGame();
+        game.BetAmount = betAmount;
         game.Deck = CreateDeck();
         Shuffle(game.Deck);
 
@@ -32,14 +57,14 @@ public class BlackjackController : Controller
         hiddenCard.IsHidden = true;
         game.DealerHand.AddCard(hiddenCard);
 
-        CheckBlackjack(game);
+        await CheckBlackjack(game, user);
         SaveGame(game);
 
         return Json(game);
     }
 
     [HttpPost("/blackjack/hit")]
-    public IActionResult Hit()
+    public async Task<IActionResult> Hit()
     {
         var game = LoadGame();
         if (game == null || game.IsGameOver) return BadRequest("Game not active");
@@ -52,6 +77,7 @@ public class BlackjackController : Controller
             game.Winner = "Dealer";
             game.Message = "Bust! You went over 21.";
             RevealDealerCard(game);
+            // No payout
         }
 
         SaveGame(game);
@@ -59,10 +85,12 @@ public class BlackjackController : Controller
     }
 
     [HttpPost("/blackjack/stand")]
-    public IActionResult Stand()
+    public async Task<IActionResult> Stand()
     {
         var game = LoadGame();
         if (game == null || game.IsGameOver) return BadRequest("Game not active");
+        var user = await _userManager.GetUserAsync(User);
+        if(user == null) return Unauthorized();
 
         RevealDealerCard(game);
 
@@ -80,11 +108,15 @@ public class BlackjackController : Controller
         {
             game.Winner = "Player";
             game.Message = "Dealer Busts! You Win!";
+            // Payout 2x
+            user.Credits += game.BetAmount * 2;
         }
         else if (playerScore > dealerScore)
         {
             game.Winner = "Player";
             game.Message = "You Win!";
+            // Payout 2x
+            user.Credits += game.BetAmount * 2;
         }
         else if (dealerScore > playerScore)
         {
@@ -95,7 +127,11 @@ public class BlackjackController : Controller
         {
             game.Winner = "Push";
             game.Message = "Push (Tie)!";
+            // Return bet
+            user.Credits += game.BetAmount;
         }
+
+        await _userManager.UpdateAsync(user);
 
         game.IsGameOver = true;
         SaveGame(game);
@@ -129,7 +165,7 @@ public class BlackjackController : Controller
 
     private Card DrawCard(List<Card> deck)
     {
-        if (!deck.Any()) return new Card(); // Should handle shuffle if empty ideally
+        if (!deck.Any()) return new Card(); 
         var card = deck[0];
         deck.RemoveAt(0);
         return card;
@@ -143,7 +179,7 @@ public class BlackjackController : Controller
         }
     }
 
-    private void CheckBlackjack(BlackjackGame game)
+    private async Task CheckBlackjack(BlackjackGame game, ApplicationUser user)
     {
         if (game.PlayerHand.Score == 21)
         {
@@ -153,12 +189,15 @@ public class BlackjackController : Controller
             {
                 game.Winner = "Push";
                 game.Message = "Push! Both have Blackjack.";
+                user.Credits += game.BetAmount;
             }
             else
             {
                 game.Winner = "Player";
                 game.Message = "Blackjack! You Win!";
+                user.Credits += (int)(game.BetAmount * 2.5); // 3:2 payout
             }
+            await _userManager.UpdateAsync(user);
         }
     }
 

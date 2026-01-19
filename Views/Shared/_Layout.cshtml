@@ -1,108 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GameLoggd</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body>
-    <header class="site-header">
-        <div class="header-container">
-            <div class="header-left">
-                <h1 class="logo">GameLoggd</h1>
-                
-                <nav class="main-nav">
-                    <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
-                    <a href="/games" class="nav-link">Games</a>
-                    <a asp-controller="List" asp-action="Index" class="nav-link">Lists</a>
-                    <a href="/casino" class="nav-link" style="color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan);">Casino</a>
-                    <a href="/members" class="nav-link">Members</a>
-                </nav>
-            </div>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"] - GameLog</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    @await RenderSectionAsync("Styles", required: false)
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df233",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102213",
+                        "accent-purple": "#a855f7",
+                        "accent-cyan": "#22d3ee",
+                        "charcoal": "#111812",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    keyframes: {
+                        "fade-in": {
+                            "0%": { opacity: "0" },
+                            "100%": { opacity: "1" }
+                        },
+                        "slide-in-up": {
+                            "0%": { opacity: "0", transform: "translateY(20px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" }
+                        },
+                        "slide-in-right": {
+                            "0%": { opacity: "0", transform: "translateX(20px)" },
+                            "100%": { opacity: "1", transform: "translateX(0)" }
+                        },
+                        "zoom-in": {
+                            "0%": { opacity: "0", transform: "scale(0.9)" },
+                            "100%": { opacity: "1", transform: "scale(1)" }
+                        },
+                        "flip-in-y": {
+                            "0%": { opacity: "0", transform: "rotateY(90deg)" },
+                            "100%": { opacity: "1", transform: "rotateY(0)" }
+                        }
+                    },
+                    animation: {
+                        "fade-in": "fade-in 0.5s ease-out forwards",
+                        "slide-in-up": "slide-in-up 0.5s ease-out forwards",
+                        "slide-in-right": "slide-in-right 0.5s ease-out forwards",
+                        "zoom-in": "zoom-in 0.3s ease-out forwards",
+                        "flip-in-y": "flip-in-y 0.6s ease-out forwards",
+                        "in": "fade-in 0.3s ease-out" // default for 'animate-in' usage if we map it
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .neon-glow:hover {
+            box-shadow: 0 0 15px rgba(13, 242, 51, 0.4);
+            border-color: #0df233;
+        }
 
-            <div class="header-right">
-                <div class="search-box">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    <input type="text" placeholder="Search games..." class="search-input" />
+        .pixel-avatar {
+            image-rendering: pixelated;
+        }
+        /* Custom scrollbar for carousel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .active-neon {
+            border-color: #0df233;
+            box-shadow: 0 0 10px rgba(13, 242, 51, 0.5);
+            background: rgba(13, 242, 51, 0.1);
+        }
+        
+        .blur-backdrop {
+            backdrop-filter: blur(12px);
+            background-color: rgba(16, 34, 19, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white selection:bg-primary selection:text-black relative">
+    <!-- Global Blurred Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[100px] mix-blend-screen"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[40%] h-[60%] rounded-full bg-accent-purple/10 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] rounded-full bg-accent-cyan/10 blur-[100px] mix-blend-screen"></div>
+    </div>
+    <div class="relative z-10 flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- TopNavBar -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
+                <div class="flex items-center gap-8">
+                    <a href="/" class="flex items-center gap-4 text-primary decoration-transparent">
+                        <div class="size-6">
+                            <span class="material-symbols-outlined text-3xl">terminal</span>
+                        </div>
+                        <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">GAMELOG</h2>
+                    </a>
+                    <nav class="flex items-center gap-9 hidden md:flex">
+                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Games">Games</a>
+                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="List" asp-action="Index">Lists</a>
+                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Casino" asp-action="Index">Casino</a>
+                        <a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" asp-controller="Home" asp-action="Members">Members</a>
+                    </nav>
                 </div>
-                @if (User?.Identity?.IsAuthenticated == true)
-                {
-                    <div class="user-menu-container">
-                        <button class="user-avatar" onclick="document.getElementById('userDropdown').classList.toggle('show')" aria-label="User menu">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </button>
-                        <div id="userDropdown" class="user-dropdown-content">
-                            <div class="dropdown-header">
-                                <span>@User.Identity.Name</span>
+                <div class="flex flex-1 justify-end gap-6 items-center">
+                    <form action="/games" method="get" class="hidden lg:flex flex-col min-w-40 !h-10 max-w-64">
+                        <div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-white/10 focus-within:border-primary transition-all">
+                            <div class="text-white/40 flex bg-white/5 items-center justify-center pl-4 rounded-l-lg border-r-0">
+                                <span class="material-symbols-outlined text-[20px]">search</span>
                             </div>
-                            <div class="dropdown-divider"></div>
-                            <a href="/user/@(Uri.EscapeDataString(User.Identity.Name!))" class="dropdown-item">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                                Profile
+                            <input name="search" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-white/5 focus:border-none h-full placeholder:text-white/30 px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal" placeholder="Find a game..." />
+                        </div>
+                    </form>
+                    
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="flex items-center gap-4">
+                             <a href="/user/@(Uri.EscapeDataString(User.Identity.Name!))" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" 
+                                style='background-image: url("@((User.FindFirst("ProfilePicture")?.Value) ?? $"https://ui-avatars.com/api/?name={User.Identity.Name}&background=random")");'>
                             </a>
-                            <form method="post" action="/account/logout" style="margin:0; padding:0;">
+                            <form method="post" action="/account/logout" class="m-0 p-0">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="dropdown-item logout-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
-                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                        <polyline points="16 17 21 12 16 7"></polyline>
-                                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                                    </svg>
-                                    Logout
+                                <button type="submit" class="flex items-center justify-center rounded-lg h-10 w-10 bg-white/5 text-white hover:bg-white/10" title="Logout">
+                                    <span class="material-symbols-outlined text-xl">logout</span>
                                 </button>
                             </form>
                         </div>
+                    }
+                    else
+                    {
+                        <a href="/account" class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_10px_rgba(13,242,51,0.3)]">
+                            Sign In
+                        </a>
+                    }
+                </div>
+            </header>
+
+            <main class="flex-grow">
+                 @if (TempData["StatusMessage"] != null)
+                {
+                    <div class="max-w-[1200px] mx-auto px-10 mt-6">
+                         <div class="bg-primary/10 border border-primary/20 text-white p-4 rounded-lg flex justify-between items-center">
+                            <span>@TempData["StatusMessage"]</span>
+                            <button onclick="this.parentElement.style.display='none'" class="text-white/50 hover:text-white">&times;</button>
+                        </div>
                     </div>
                 }
-                else
-                {
-                    <a href="/account" class="user-avatar" aria-label="Login">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </a>
-                }
-            </div>
+                @RenderBody()
+            </main>
+
+            <!-- Footer -->
+            <footer class="border-t border-white/10 py-10 px-10 bg-black/20 mt-auto">
+                <div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2 text-primary">
+                            <span class="material-symbols-outlined text-xl">terminal</span>
+                            <span class="text-lg font-bold tracking-tighter">GAMELOG</span>
+                        </div>
+                        <p class="text-white/30 text-xs">© @DateTime.Now.Year GAMELOG INC. ALL RIGHTS RESERVED.</p>
+                    </div>
+                    <div class="flex gap-8 text-white/50 text-xs font-bold uppercase tracking-widest">
+                        <a class="hover:text-primary transition-colors" href="#">API</a>
+                        <a class="hover:text-primary transition-colors" href="#">Privacy</a>
+                        <a class="hover:text-primary transition-colors" href="#">Terms</a>
+                        <a class="hover:text-primary transition-colors" href="#">About</a>
+                        <a class="hover:text-primary transition-colors" href="#">Contact</a>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="material-symbols-outlined text-white/40 hover:text-primary cursor-pointer">public</span>
+                        <span class="material-symbols-outlined text-white/40 hover:text-primary cursor-pointer">rss_feed</span>
+                        <span class="material-symbols-outlined text-white/40 hover:text-primary cursor-pointer">gamepad</span>
+                    </div>
+                </div>
+            </footer>
         </div>
-    </header>
-
-    <main>
-        @if (TempData["StatusMessage"] != null)
-        {
-            <div style="max-width: 1200px; margin: 1rem auto; padding: 1rem; background: #222; border: 1px solid var(--neon-cyan); border-radius: 8px; color: white; display: flex; align-items: center; justify-content: space-between;">
-                <span>@TempData["StatusMessage"]</span>
-                <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:#888; cursor:pointer;">✕</button>
-            </div>
-        }
-        @RenderBody()
-    </main>
-
+    </div>
+    
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        // Close the dropdown if the user clicks outside of it
-        window.onclick = function(event) {
-            if (!event.target.closest('.user-menu-container')) {
-                var dropdowns = document.getElementsByClassName("user-dropdown-content");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

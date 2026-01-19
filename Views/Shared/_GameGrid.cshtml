@@ -1,20 +1,39 @@
 @model List<GameLoggd.Models.Domain.Game>
 
-@if (Model.Any())
+@if (Model != null && Model.Any())
 {
-    <div class="games-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem;">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         @foreach (var game in Model)
         {
-            <a href="/game/@game.Slug" class="game-card" style="text-decoration: none; color: inherit; display: block; position: relative; transition: transform 0.2s;">
-                <div style="aspect-ratio: 2/3; background: #333; border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem;">
-                    <img src="@(string.IsNullOrEmpty(game.ImagePath) ? "/images/placeholder.jpg" : game.ImagePath)" alt="@game.Title" style="width: 100%; height: 100%; object-fit: cover;">
+            <a href="/game/@game.Slug" class="block group relative bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:scale-105 hover:border-primary/50 transition-all duration-300 shadow-lg hover:shadow-primary/20">
+                <div class="aspect-[2/3] w-full relative overflow-hidden bg-background-dark">
+                    <img src="@(string.IsNullOrEmpty(game.ImagePath) ? "/images/placeholder_game.jpg" : game.ImagePath)" 
+                         alt="@game.Title" 
+                         loading="lazy"
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    
+                    <!-- Hover Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                        <span class="text-primary font-bold text-sm tracking-wide transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 truncate w-full">@game.Title</span>
+                        <span class="text-white/60 text-xs transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">@game.Year</span>
+                    </div>
                 </div>
-                <div style="font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@game.Title</div>
+                
+                <!-- Fallback Title for images that might fail or placeholders, or just always visible if preferred. 
+                     Here keeping it minimal like the design. 
+                     The hover overlay handles text, but for accessibility/mobile we might want text below. 
+                     Let's add a minimal label below if desired, or stick to the poster-only look which is cleaner. -->
+                <div class="p-3 bg-background-dark border-t border-white/5 group-hover:border-primary/20 transition-colors">
+                     <div class="text-white font-semibold text-sm truncate group-hover:text-primary transition-colors">@game.Title</div>
+                </div>
             </a>
         }
     </div>
 }
 else
 {
-    <div style="text-align: center; color: #666; padding: 2rem;">No games found.</div>
+    <div class="flex flex-col items-center justify-center py-20 text-white/30 border border-white/5 border-dashed rounded-xl bg-white/5">
+        <span class="material-symbols-outlined text-4xl mb-2">videogame_asset_off</span>
+        <p class="font-display">No games found.</p>
+    </div>
 }

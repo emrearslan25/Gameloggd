@@ -3,301 +3,280 @@
     ViewData["Title"] = Model.Game.Title;
 }
 
-<div class="detail-hero">
-    <div class="detail-hero-bg">
-        @if (!string.IsNullOrEmpty(Model.Game.ImagePath))
-        {
-            <img src="@Model.Game.ImagePath" alt="@Model.Game.Title"/>
-        }
+<div class="relative w-full">
+    <!-- Cinematic Header Background -->
+    <div class="absolute top-0 left-0 w-full h-[500px] overflow-hidden -z-10">
+        <div class="w-full h-full bg-center bg-cover scale-110 blur-xl opacity-40" 
+             style='background-image: url("@(string.IsNullOrEmpty(Model.Game.ImagePath) ? "/images/placeholder_game.jpg" : Model.Game.ImagePath)");'>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-background-dark/60 to-background-dark"></div>
     </div>
-    <div class="detail-hero-overlay"></div>
-    <div class="detail-hero-content">
-        <div class="page-container" style="width: 100%;">
-            <div class="detail-grid">
-                <div class="detail-poster">
-                    @if (!string.IsNullOrEmpty(Model.Game.ImagePath))
+
+    <div class="max-w-[1200px] mx-auto px-6 pt-12 pb-20">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <!-- Left Column: Poster -->
+            <div class="md:col-span-3">
+                <div class="sticky top-24">
+                    <div class="aspect-[2/3] w-full rounded-xl overflow-hidden shadow-2xl border border-white/10 relative group">
+                        <div class="w-full h-full bg-center bg-cover transition-transform duration-700 group-hover:scale-105" 
+                             style='background-image: url("@(string.IsNullOrEmpty(Model.Game.ImagePath) ? "/images/placeholder_game.jpg" : Model.Game.ImagePath)");'>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Content -->
+            <div class="md:col-span-6 flex flex-col gap-6">
+                <!-- Title & Meta -->
+                <div>
+                    <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase font-display leading-[0.9] mb-2">
+                        @Model.Game.Title
+                    </h1>
+                    <p class="text-primary text-lg font-medium tracking-wide flex items-center gap-2">
+                        <span>@(Model.Game.Year?.ToString() ?? "N/A")</span>
+                        <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                        <span>@(string.IsNullOrWhiteSpace(Model.Game.Developer) ? "Unknown Developer" : Model.Game.Developer)</span>
+                    </p>
+                </div>
+
+                <!-- Description -->
+                <div class="prose prose-invert prose-p:text-white/70 max-w-none">
+                    <p>@Model.Game.Description</p>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-3 gap-4 py-6 border-y border-white/10">
+                    <div class="flex flex-col gap-1">
+                        <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Rating</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-3xl font-black text-white">@Model.AverageRating.ToString("0.0")</span>
+                            <div class="flex text-primary text-xs">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    double val = Model.AverageRating - i;
+                                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' @(val >= 1 ? 1 : 0)">@(val >= 1 ? "star" : (val >= 0.5 ? "star_half" : "star"))</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Logs</span>
+                        <span class="text-3xl font-black text-white">@Model.Reviews.Count</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Ranked</span>
+                        <span class="text-3xl font-black text-white">#--</span>
+                    </div>
+                </div>
+                
+                 <!-- Genres & Platforms -->
+                 <div class="flex flex-wrap gap-2">
+                    @foreach(var g in Model.Game.Genres)
                     {
-                        <img src="@Model.Game.ImagePath" alt="@Model.Game.Title" />
+                        <a href="/games?genre=@g.Name" class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold text-white/70 hover:text-white transition-colors uppercase tracking-wider">
+                            @g.Name
+                        </a>
+                    }
+                 </div>
+                 
+                 <div class="flex flex-wrap gap-2">
+                    @foreach(var p in Model.Game.Platforms)
+                    {
+                         <span class="px-2 py-1 bg-black/20 text-white/50 text-[10px] uppercase font-bold tracking-widest rounded border border-white/5">
+                            @p.Name
+                        </span>
+                    }
+                 </div>
+
+                <!-- Community Feed Section -->
+                <div class="mt-8 space-y-6">
+                    <div class="flex items-center justify-between">
+                         <h3 class="text-xl font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">forum</span>
+                            Community Reviews
+                        </h3>
+                    </div>
+
+                    @if(Model.Reviews.Any())
+                    {
+                        <div class="space-y-4">
+                            @foreach(var review in Model.Reviews)
+                            {
+                                <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:bg-white/10 transition-colors">
+                                    <div class="flex gap-4">
+                                        <a href="/user/@review.User?.UserName" class="size-10 rounded-full bg-black/20 shrink-0 overflow-hidden border border-white/10">
+                                             <div class="w-full h-full bg-center bg-no-repeat bg-cover pixel-avatar" 
+                                                 style='background-image: url("@(string.IsNullOrEmpty(review.User?.ProfilePicturePath) ? $"https://ui-avatars.com/api/?name={review.User?.UserName}&background=random" : review.User?.ProfilePicturePath)");'>
+                                            </div>
+                                        </a>
+                                        <div class="flex-1 space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <a href="/user/@review.User?.UserName" class="font-bold text-white hover:text-primary transition-colors">@review.User?.UserName</a>
+                                                    <div class="flex text-primary">
+                                                        @for (int i = 0; i < 5; i++)
+                                                        {
+                                                            double val = review.Rating - i;
+                                                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' @(val >= 1 ? 1 : 0)">@(val >= 1 ? "star" : (val >= 0.5 ? "star_half" : "star"))</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <span class="text-white/30 text-xs font-bold uppercase">@review.CreatedAt.ToString("MMM dd")</span>
+                                            </div>
+                                            <p class="text-white/80 text-sm leading-relaxed">@review.Content</p>
+                                            
+                                            <!-- Review Actions (Like/Comment) -->
+                                            <div class="flex items-center gap-4 pt-2">
+                                                 <form method="post" action="/review/like" class="contents">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="reviewId" value="@review.Id" />
+                                                    <button type="submit" class="flex items-center gap-1 text-xs font-bold uppercase tracking-wider @(review.IsLikedByCurrentUser ? "text-red-500" : "text-white/40 hover:text-white") transition-colors">
+                                                        <span class="material-symbols-outlined text-base">favorite</span>
+                                                        <span>@review.LikeCount</span>
+                                                    </button>
+                                                </form>
+                                                <!-- Add comment button/modal trigger here if needed -->
+                                            </div>
+                                            
+                                            <!-- Comments -->
+                                            @if(review.Comments.Any())
+                                            {
+                                                <div class="pl-4 border-l-2 border-white/10 mt-3 space-y-2">
+                                                    @foreach(var comment in review.Comments)
+                                                    {
+                                                        <div class="text-xs">
+                                                            <span class="font-bold text-accent-cyan">@comment.User?.UserName:</span>
+                                                            <span class="text-white/60">@comment.Content</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     }
                     else
                     {
-                        <div style="width:100%; height: 380px; background: #222; display: flex; align-items:center; justify-content:center; color: #555;">No Image</div>
+                        <div class="p-8 text-center text-white/40 border border-white/10 rounded-xl bg-white/5 border-dashed">
+                            No reviews yet. Be the first to share your thoughts!
+                        </div>
                     }
                 </div>
-                <div class="detail-info">
-                    <h1 style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">@Model.Game.Title</h1>
-                    <div class="detail-meta">
-                        <span>@(Model.Game.Year?.ToString() ?? "—")</span>
-                        <span class="dot">•</span>
-                        <span>@(string.IsNullOrWhiteSpace(Model.Game.Developer) ? "Unknown Dev" : Model.Game.Developer)</span>
-                    </div>
+            </div>
 
-                    <div class="detail-rating">
-                        <div class="stars">
-                            @{
-                                var avg = Model.AverageRating;
-                                var full = (int)Math.Floor(avg);
-                                var half = (avg - full) >= 0.5;
-                                var empty = 5 - full - (half ? 1 : 0);
-                            }
-                            @for (int i = 0; i < full; i++) { <span class="star filled">★</span> }
-                            @if(half) { <span class="star half">★</span> }
-                            @for (int i = 0; i < empty; i++) { <span class="star">★</span> }
-                        </div>
-                        <span class="rating-number">@Model.AverageRating.ToString("0.0")</span>
-                        <span class="rating-count">(@Model.Reviews.Count reviews)</span>
-                    </div>
-
-                    <div class="detail-description" style="margin-bottom: 2rem; max-width: 40rem; line-height: 1.6; color: #e0e0e0; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-                        @Model.Game.Description
-                    </div>
-
-                    <div class="detail-actions">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <!-- Log Button Dropdown Logic (Simplified as form buttons for now) -->
-                            <form method="post" action="/game/@Model.Game.Slug/log" style="display:inline;">
+            <!-- Right Column: Dashboard -->
+            <div class="md:col-span-3 space-y-6">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="bg-background-dark/50 backdrop-blur-md border border-white/10 p-6 rounded-xl sticky top-24">
+                        <div class="flex flex-col gap-3">
+                             <form method="post" action="/game/@Model.Game.Slug/log" class="w-full">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="status" value="Played" />
-                                <button type="submit" class="btn-primary" style="@(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Played ? "box-shadow: 0 0 15px var(--neon-cyan);" : "")">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M20 6L9 17l-5-5"></path>
-                                    </svg>
-                                    @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Played ? "Played" : "Log as Played")
-                                </button>
-                            </form>
-
-                            <form method="post" action="/game/@Model.Game.Slug/log" style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="status" value="Backlog" />
-                                <button type="submit" class="btn-secondary" style="@(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Backlog ? "border-color: var(--neon-cyan); color: var(--neon-cyan);" : "")">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 5v14M5 12h14"></path>
-                                    </svg>
-                                    @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Backlog ? "In Backlog" : "Add to Backlog")
+                                <button type="submit" class="w-full py-4 rounded-lg bg-white/5 border border-white/10 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-center gap-2 group @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Played ? "border-primary bg-primary/10 text-primary" : "text-white")">
+                                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">check_circle</span>
+                                    <span class="font-bold uppercase tracking-wider text-sm">Played</span>
                                 </button>
                             </form>
                             
-                             <form method="post" action="/game/@Model.Game.Slug/log" style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="status" value="Playing" />
-                                <button type="submit" class="btn-secondary" style="@(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Playing ? "border-color: var(--neon-purple); color: var(--neon-purple);" : "")">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                                        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Playing ? "Playing" : "Playing")
-                                </button>
-                            </form>
-                        }
-                        else 
-                        {
-                            <a href="/account" class="btn-primary">Login to Log</a>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="page-container" style="padding-top: 3rem; padding-bottom: 3rem;">
-    <div class="detail-grid">
-        <div class="sidebar">
-
-            <h3 style="color: #888; margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em;">Platforms</h3>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
-                @foreach(var p in Model.Game.Platforms)
-                {
-                    <span style="padding: 0.4rem 0.8rem; background: #222; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333;">
-                        @if(!string.IsNullOrEmpty(p.IconClass))
-                        {
-                            <i class="@p.IconClass" style="margin-right:0.3rem;"></i>
-                        }
-                        @p.Name
-                    </span>
-                }
-                @if(!Model.Game.Platforms.Any()) { <span style="color:#555;">No platforms info</span> }
-            </div>
-
-            <h3 style="color: #888; margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em;">Genres</h3>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                @foreach(var g in Model.Game.Genres)
-                {
-                    <span style="padding: 0.4rem 0.8rem; background: #222; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333;">@g.Name</span>
-                }
-                @if(!Model.Game.Genres.Any()) { <span style="color:#555;">No genre info</span> }
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                Reviews
-                <span style="font-size: 1rem; color: #666; font-weight: normal;">@Model.Reviews.Count</span>
-            </h2>
-
-            @if (User.Identity.IsAuthenticated)
-            {
-                <div style="margin-bottom: 2rem;">
-                     <!-- Trigger Button -->
-                     <button onclick="openRatingModal()" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1.1rem;">
-                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">★</span> 
-                        @(Model.CurrentUserReview != null ? $"Your Rating: {Model.CurrentUserReview.Rating}" : "Rate or Review this Game")
-                     </button>
-                </div>
-
-                <!-- Rating Modal -->
-                <div id="ratingModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
-                    <div class="modal-content" style="background-color: var(--bg-card); margin: 10% auto; padding: 2rem; border: 1px solid var(--border-color); width: 90%; max-width: 500px; border-radius: 1rem; box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative;">
-                        <span class="close" onclick="closeRatingModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s;">&times;</span>
-                        <h2 style="margin-bottom: 1.5rem; color: white;">Rate @Model.Game.Title</h2>
-                        
-                        <form method="post" action="/game/@Model.Game.Slug/review">
-                            @Html.AntiForgeryToken()
-                            
-                            <div class="star-rating" style="margin-bottom: 1.5rem; text-align: center;">
-                                <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">Your Rating</p>
-                                <div class="stars-input">
-                                    @{
-                                        double currentRating = Model.CurrentUserReview?.Rating ?? 0;
-                                    }
-                                    @for (double i = 5; i >= 0.5; i -= 0.5)
-                                    {
-                                        var isChecked = currentRating == i;
-                                        var idStr = "star-" + i.ToString().Replace(".", "-").Replace(",", "-");
-                                        <input type="radio" name="rating" value="@i" id="@idStr" @(isChecked ? "checked" : "") style="display: none;" />
-                                        <label for="@idStr" class="@((i % 1 != 0) ? "half" : "full")" title="@i"></label>
-                                    }
-                                </div>
-                            </div>
-                            
-                            <!-- Optional Date Logic (Only if Played) -->
-                            <!-- Re-integrating the DatePlayed logic cleanly -->
-                            <div class="review-input" style="margin-bottom: 1.5rem;">
-                                <label for="playedDate" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Date Played (Optional)</label>
-                                <input type="date" name="datePlayed" id="playedDate" 
-                                       value="@(Model.CurrentUserStatus?.DatePlayed?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" 
-                                       style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.8rem; border-radius: 4px;" />
-                            </div>
-
-                            <div class="review-input" style="margin-bottom: 1.5rem;">
-                                <label for="review" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Review (Optional)</label>
-                                <textarea name="content" id="review" rows="4" placeholder="What do you think about this game?" 
-                                          style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 0.8rem; border-radius: 4px; resize: vertical;">@(Model.CurrentUserReview?.Content)</textarea>
-                            </div>
-                            
-                            <div class="modal-actions" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                                @if (Model.CurrentUserReview != null)
-                                {
-                                    /* Logic for delete would usually go to a separate endpoint or method, 
-                                       simulating via a separate form button if needed or js */
-                                }
-                                <button type="button" class="btn-secondary" onclick="closeRatingModal()">Cancel</button>
-                                <button type="submit" class="btn-primary">Save Rating</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
-            else 
-            {
-                 <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; text-align: center; border-radius: 0.75rem; margin-bottom: 2rem; color: var(--text-secondary);">
-                    <a href="/account" style="color: var(--neon-cyan); text-decoration: underline;">Login</a> to write a review.
-                </div>
-            }
-
-            <div class="reviews-list">
-                @foreach (var review in Model.Reviews)
-                {
-                    <div class="review-card">
-                        <div class="review-avatar avatar-cyan">
-                            @(review.User?.UserName?.Substring(0,1).ToUpper() ?? "?")
-                        </div>
-                        <div class="review-content">
-                             <div class="review-header" style="justify-content: space-between;">
-                                <div style="display:flex; gap: 0.5rem; align-items:center;">
-                                    <span class="reviewer-name">@review.User?.UserName</span>
-                                    <div class="review-stars">
-                                        @for(int i=1; i<=5; i++) 
-                                        {
-                                            if (review.Rating >= i) { <span class="star filled">★</span> }
-                                            else if (review.Rating >= i - 0.5) { <span class="star half">★</span> }
-                                            else { <span class="star">★</span> }
-                                        }
-                                    </div>
-                                </div>
-                                <span class="review-time">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
-                            </div>
-                            <p class="review-text">@review.Content</p>
-                            
-                            <div class="review-footer" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                                <form method="post" action="/review/like">
+                            <div class="grid grid-cols-2 gap-3">
+                                <form method="post" action="/game/@Model.Game.Slug/log" class="w-full">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="reviewId" value="@review.Id" />
-                                    <button type="submit" style="display: flex; align-items: center; gap: 0.3rem; color: @(review.IsLikedByCurrentUser ? "#ff304f" : "#666"); transition: color 0.2s; background:none; border:none; padding:0; cursor:pointer;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="@(review.IsLikedByCurrentUser ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
-                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                        </svg>
-                                        <span style="font-size: 0.9rem;">@review.LikeCount</span>
+                                    <input type="hidden" name="status" value="Playing" />
+                                     <button type="submit" class="w-full py-3 rounded-lg bg-white/5 border border-white/10 hover:border-accent-purple hover:text-accent-purple transition-all flex flex-col items-center justify-center gap-1 group @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Playing ? "border-accent-purple text-accent-purple" : "text-white")">
+                                        <span class="material-symbols-outlined text-lg">joystick</span>
+                                        <span class="font-bold uppercase tracking-wider text-[10px]">Playing</span>
+                                    </button>
+                                </form>
+                                 <form method="post" action="/game/@Model.Game.Slug/log" class="w-full">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="status" value="Backlog" />
+                                    <button type="submit" class="w-full py-3 rounded-lg bg-white/5 border border-white/10 hover:border-accent-cyan hover:text-accent-cyan transition-all flex flex-col items-center justify-center gap-1 group @(Model.CurrentUserStatus?.Status == GameLoggd.Models.Domain.GameStatus.Backlog ? "border-accent-cyan text-accent-cyan" : "text-white")">
+                                        <span class="material-symbols-outlined text-lg">bookmark</span>
+                                        <span class="font-bold uppercase tracking-wider text-[10px]">Backlog</span>
                                     </button>
                                 </form>
                             </div>
-                            
-                            <!-- COMMENTS SECTION -->
-                            <div class="review-comments" style="margin-top: 1rem; border-top: 1px solid #333; padding-top: 0.5rem;">
-                                @if (review.Comments.Any())
-                                {
-                                    <div style="margin-bottom: 0.5rem;">
-                                        @foreach(var comment in review.Comments)
-                                        {
-                                            <div style="font-size: 0.85rem; margin-bottom: 0.3rem; color: #ccc;">
-                                                <span style="color: var(--neon-cyan); font-weight: bold;">@comment.User?.UserName:</span>
-                                                @comment.Content
-                                            </div>
-                                        }
-                                    </div>
-                                }
 
-                                @if (User.Identity.IsAuthenticated)
-                                {
-                                    <form method="post" action="/review/comment" style="display:flex; gap:0.5rem;">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="reviewId" value="@review.Id" />
-                                        <input name="content" placeholder="Write a comment..." style="background: #222; border: 1px solid #444; color: #fff; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem; flex-grow: 1;" required />
-                                        <button type="submit" style="background: var(--neon-cyan); border:none; border-radius: 4px; padding: 0 0.8rem; cursor:pointer; font-size: 0.8rem; color:#000; font-weight:bold;">Post</button>
-                                    </form>
-                                }
-                            </div>
+                            <button onclick="document.getElementById('reviewModal').showModal()" class="w-full mt-2 py-3 bg-primary hover:bg-white text-black font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">rate_review</span>
+                                Review
+                            </button>
                         </div>
+                        
+                         @if (Model.CurrentUserReview != null)
+                        {
+                            <div class="mt-6 pt-6 border-t border-white/10">
+                                <p class="text-xs text-white/50 uppercase font-bold tracking-widest mb-2">Your Review</p>
+                                <div class="flex text-primary mb-2">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        double val = Model.CurrentUserReview.Rating - i;
+                                        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' @(val >= 1 ? 1 : 0)">@(val >= 1 ? "star" : (val >= 0.5 ? "star_half" : "star"))</span>
+                                    }
+                                </div>
+                                <p class="text-sm text-white/80 italic line-clamp-3">"@Model.CurrentUserReview.Content"</p>
+                            </div>
+                        }
                     </div>
                 }
-
-                @if(!Model.Reviews.Any())
+                else
                 {
-                    <p style="color: #666; font-style: italic;">No reviews yet. Be the first to review!</p>
+                    <div class="bg-background-dark/50 backdrop-blur-md border border-white/10 p-6 rounded-xl sticky top-24 text-center">
+                        <p class="text-white/60 mb-4">Sign in to log, rate, and review games.</p>
+                         <a href="/account" class="block w-full py-3 bg-primary text-black font-bold uppercase tracking-wider rounded-lg hover:bg-white transition-colors">
+                            Sign In
+                        </a>
+                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function openRatingModal() {
-            var modal = document.getElementById('ratingModal');
-            if(modal) modal.style.display = 'block';
-        }
-        
-        function closeRatingModal() {
-            var modal = document.getElementById('ratingModal');
-            if(modal) modal.style.display = 'none';
-        }
-        
-        window.onclick = function(event) {
-            var modal = document.getElementById('ratingModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-    </script>
-}
+<!-- Review Modal (Using HTML5 <dialog>) -->
+<dialog id="reviewModal" class="bg-transparent p-0 w-full max-w-lg backdrop:bg-black/80 backdrop:backdrop-blur-sm open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in">
+    <div class="bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-white/10 flex items-center justify-between">
+            <h3 class="text-xl font-bold text-white uppercase tracking-tight">Rate & Review</h3>
+            <form method="dialog">
+                <button class="text-white/50 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </form>
+        </div>
+        <form method="post" action="/game/@Model.Game.Slug/review" class="p-6 space-y-6">
+            @Html.AntiForgeryToken()
+            
+            <div class="space-y-2 text-center">
+                <label class="text-xs font-bold text-white/50 uppercase tracking-widest">Rating</label>
+                <div class="flex flex-row-reverse justify-center gap-0 relative">
+                     @for (double r = 5.0; r >= 0.5; r -= 0.5)
+                    {
+                        bool isHalf = (r % 1 != 0);
+                        string inputId = $"rating-{r.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)}";
+                        
+                        <input type="radio" id="@inputId" name="rating" value="@r.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)" class="peer hidden" @(Model.CurrentUserReview?.Rating == r ? "checked" : "") required />
+                        <label for="@inputId" class="cursor-pointer text-white/20 text-6xl peer-checked:text-primary peer-hover:text-primary peer-[.peer:checked~&]:text-primary peer-[.peer:hover~&]:text-primary transition-colors p-0 m-0 w-[0.5em] overflow-hidden relative inline-block h-[1em] leading-none" title="@r">
+                            <span class="material-symbols-outlined absolute top-0 @(isHalf ? "left-0" : "right-0")" style="font-variation-settings: 'FILL' 1; width: 1em; height: 1em; font-size: 1em;">star</span>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-white/50 uppercase tracking-widest">Your Thoughts</label>
+                <textarea name="content" rows="4" class="w-full bg-black/40 border-white/10 rounded-lg text-white p-3 focus:ring-primary focus:border-primary placeholder:text-white/20 resize-none text-sm" placeholder="Write your review here...">@(Model.CurrentUserReview?.Content)</textarea>
+            </div>
+
+            <div class="flex justify-end gap-4 pt-2">
+                <form method="dialog">
+                    <button class="px-6 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors font-bold text-sm uppercase">Cancel</button>
+                </form>
+                <button type="submit" class="px-6 py-2 rounded-lg bg-primary text-black font-bold text-sm uppercase tracking-wide hover:brightness-110">Post Review</button>
+            </div>
+        </form>
+    </div>
+</dialog>

@@ -12,4 +12,8 @@ public class ApplicationUser : IdentityUser
 
     [System.ComponentModel.DataAnnotations.MaxLength(500)]
     public string? Bio { get; set; }
+
+    public int Credits { get; set; } = 1000; // Default starter credits
+
+    public DateTime? LastDailyBonus { get; set; }
 }

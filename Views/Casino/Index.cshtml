@@ -2,203 +2,177 @@
     ViewData["Title"] = "Casino Lobby";
 }
 
-<style>
-    .casino-lobby {
-        min-height: 80vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at center, #111 0%, #000 100%);
-        padding: 2rem;
-        font-family: 'Outfit', sans-serif;
-    }
-
-    .lobby-header {
-        text-align: center;
-        margin-bottom: 4rem;
-        animation: fadeInDown 1s ease-out;
-    }
-
-    .lobby-title {
-        font-size: 4rem;
-        color: #fff;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        margin-bottom: 0.5rem;
-        text-shadow: 
-            0 0 10px rgba(0, 255, 255, 0.5),
-            0 0 20px rgba(0, 255, 255, 0.3),
-            0 0 30px rgba(0, 255, 255, 0.1);
-    }
-    
-    .lobby-subtitle {
-        font-size: 1.2rem;
-        color: #aaa;
-        letter-spacing: 2px;
-    }
-
-    .games-grid {
-        display: flex;
-        gap: 3rem;
-        flex-wrap: wrap;
-        justify-content: center;
-        max-width: 1200px;
-    }
-
-    .game-card {
-        width: 300px;
-        height: 400px;
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        background: #1a1a1a;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        border: 2px solid transparent;
-        text-decoration: none;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .game-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    }
-
-    /* Game Specific Styles */
-    .game-card.blackjack {
-        border-color: var(--neon-purple);
-    }
-    .game-card.blackjack:hover {
-        box-shadow: 0 0 30px rgba(188, 19, 254, 0.4);
-    }
-    
-    .game-card.poker {
-        border-color: var(--neon-cyan);
-    }
-    .game-card.poker:hover {
-        box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
-    }
-
-    .game-card.holdem {
-        border-color: #ffd700;
-    }
-    .game-card.holdem:hover {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-    }
-
-    .card-image {
-        flex: 1;
-        background-size: cover;
-        background-position: center;
-        position: relative;
-    }
-    
-    .card-image::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 50%;
-        background: linear-gradient(to top, #1a1a1a 10%, transparent);
-    }
-
-    /* Fallback visual if no images */
-    .card-visual {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 5rem;
-    }
-    
-    .blackjack .card-visual { background: linear-gradient(45deg, #2a0a2a, #111); color: var(--neon-purple); }
-    .poker .card-visual { background: linear-gradient(45deg, #0a2a2a, #111); color: var(--neon-cyan); }
-    .holdem .card-visual { background: linear-gradient(45deg, #2a2a0a, #111); color: #ffd700; }
-
-    .card-content {
-        padding: 2rem;
-        background: #1a1a1a;
-        z-index: 2;
-        border-top: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .game-title {
-        font-size: 1.8rem;
-        color: #fff;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-    }
-    
-    .game-desc {
-        color: #888;
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-
-    .play-btn {
-        margin-top: 1rem;
-        display: inline-block;
-        padding: 8px 20px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.1);
-        color: #fff;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: background 0.3s;
-    }
-    
-    .game-card:hover .play-btn {
-        background: #fff;
-        color: #000;
-        font-weight: bold;
-    }
-
-    @@keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-
-<div class="casino-lobby">
-    <div class="lobby-header">
-        <h1 class="lobby-title">Casino</h1>
-        <p class="lobby-subtitle">Experience the Neon Nightlife</p>
+<div class="w-full min-h-screen pt-24 pb-12 px-4 relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-accent-purple/10 rounded-full blur-[120px] mix-blend-screen"></div>
+        <div class="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent-cyan/10 rounded-full blur-[100px] mix-blend-screen"></div>
     </div>
 
-    <div class="games-grid">
-        <!-- Blackjack -->
-        <a href="/blackjack" class="game-card blackjack">
-            <div class="card-visual">♠️</div>
-            <div class="card-content">
-                <div class="game-title">Blackjack</div>
-                <div class="game-desc">The classic game of 21. Beat the dealer in style.</div>
-                <span class="play-btn">Play Now</span>
+    <div class="relative z-10 max-w-7xl mx-auto space-y-12 text-center">
+        
+        <!-- Header -->
+        <div class="space-y-6 animate-in fade-in slide-in-from-top-8 duration-700">
+            <div class="space-y-2">
+                <h1 class="text-6xl md:text-8xl font-black font-display text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/50 tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    CASINO
+                </h1>
+                <p class="text-xl md:text-2xl text-white/50 font-light tracking-[0.2em] uppercase">Experience the Neon Nightlife</p>
             </div>
-        </a>
 
-        <!-- Video Poker -->
-        <a href="/poker" class="game-card poker">
-            <div class="card-visual">♣️</div>
-            <div class="card-content">
-                <div class="game-title">Video Poker</div>
-                <div class="game-desc">Jacks or Better. Strategy meets luck in this retro classic.</div>
-                <span class="play-btn">Play Now</span>
-            </div>
-        </a>
+            <!-- Wallet HUD -->
+            <div class="inline-flex flex-col md:flex-row items-center gap-6 p-2 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+                
+                <!-- Balance -->
+                <div class="px-8 py-3 rounded-full bg-black/40 border border-accent-cyan/30 flex items-center gap-4 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-accent-cyan/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    <div class="text-xs font-bold uppercase tracking-widest text-accent-cyan/70">Balance</div>
+                    <div class="text-2xl font-bold font-ibm-plex-mono text-white tracking-tight flex items-baseline gap-1">
+                        <span id="user-credits" class="group-hover:scale-110 transition-transform inline-block origin-right">@ViewBag.Credits</span>
+                        <span class="text-sm text-accent-cyan">CR</span>
+                    </div>
+                </div>
 
-        <!-- Texas Hold'em -->
-        <a href="/holdem" class="game-card holdem">
-            <div class="card-visual">♦️</div>
-            <div class="card-content">
-                <div class="game-title">Texas Hold'em</div>
-                <div class="game-desc">Heads Up vs Bot. Test your poker face and betting skills.</div>
-                <span class="play-btn">Play Now</span>
+                <!-- Action Button / Timer -->
+                <div class="px-2">
+                     @if (ViewBag.BonusAvailable == true)
+                    {
+                        <button onclick="claimBonus()" id="btn-claim" class="bg-accent-purple hover:bg-white hover:text-accent-purple text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] animate-pulse">
+                            Claim Daily Bonus (+1000)
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="flex items-center gap-3 px-6 py-2 text-white/40 font-mono text-sm">
+                            <span class="text-xs uppercase tracking-widest">Next Bonus</span>
+                            <span id="bonus-timer" class="text-white font-bold bg-white/10 px-3 py-1 rounded">--:--:--</span>
+                        </div>
+                    }
+                </div>
             </div>
-        </a>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-8">
+            
+            <!-- Blackjack -->
+            <a href="/blackjack" class="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border-2 border-transparent hover:border-accent-purple transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(168,85,247,0.2)] aspect-[3/4] flex flex-col">
+                <div class="absolute inset-0 bg-gradient-to-b from-accent-purple/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div class="flex-1 flex items-center justify-center relative z-10 p-8">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-accent-purple/20 to-black border border-accent-purple/50 flex items-center justify-center text-6xl shadow-[0_0_30px_rgba(168,85,247,0.3)] group-hover:scale-110 transition-transform duration-300">
+                        ♠️
+                    </div>
+                </div>
+
+                <div class="relative z-10 bg-black/60 backdrop-blur-sm p-8 border-t border-white/10 text-left space-y-2">
+                    <h3 class="text-2xl font-bold text-white group-hover:text-accent-purple transition-colors">Blackjack</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">The classic game of 21. Beat the dealer in style.</p>
+                    <div class="pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">
+                        <span>Play Now</span>
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Video Poker -->
+            <a href="/poker" class="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border-2 border-transparent hover:border-accent-cyan transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(34,211,238,0.2)] aspect-[3/4] flex flex-col">
+                <div class="absolute inset-0 bg-gradient-to-b from-accent-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div class="flex-1 flex items-center justify-center relative z-10 p-8">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-accent-cyan/20 to-black border border-accent-cyan/50 flex items-center justify-center text-6xl shadow-[0_0_30px_rgba(34,211,238,0.3)] group-hover:scale-110 transition-transform duration-300">
+                        ♣️
+                    </div>
+                </div>
+
+                <div class="relative z-10 bg-black/60 backdrop-blur-sm p-8 border-t border-white/10 text-left space-y-2">
+                    <h3 class="text-2xl font-bold text-white group-hover:text-accent-cyan transition-colors">Video Poker</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">Jacks or Better. Strategy meets luck in this retro classic.</p>
+                    <div class="pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">
+                        <span>Play Now</span>
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Texas Hold'em -->
+            <a href="/holdem" class="group relative bg-[#1a1a1a] rounded-[2rem] overflow-hidden border-2 border-transparent hover:border-yellow-400 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(250,204,21,0.2)] aspect-[3/4] flex flex-col">
+                <div class="absolute inset-0 bg-gradient-to-b from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div class="flex-1 flex items-center justify-center relative z-10 p-8">
+                    <div class="w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400/20 to-black border border-yellow-400/50 flex items-center justify-center text-6xl shadow-[0_0_30px_rgba(250,204,21,0.3)] group-hover:scale-110 transition-transform duration-300">
+                        ♦️
+                    </div>
+                </div>
+
+                <div class="relative z-10 bg-black/60 backdrop-blur-sm p-8 border-t border-white/10 text-left space-y-2">
+                    <h3 class="text-2xl font-bold text-white group-hover:text-yellow-400 transition-colors">Texas Hold'em</h3>
+                    <p class="text-white/50 text-sm leading-relaxed">Heads Up vs Bot. Test your poker face and betting skills.</p>
+                    <div class="pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/30 group-hover:text-white transition-colors">
+                        <span>Play Now</span>
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
     </div>
 </div>
+
+<script>
+    function claimBonus() {
+        const btn = document.getElementById('btn-claim');
+        if(btn) btn.disabled = true;
+
+        fetch('/casino/claim-bonus', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.success) {
+                const creditEl = document.getElementById('user-credits');
+                if(creditEl) creditEl.innerText = data.credits;
+                
+                // Animate credit change
+                creditEl.classList.add('text-primary', 'scale-125');
+                setTimeout(() => creditEl.classList.remove('text-primary', 'scale-125'), 500);
+
+                if(btn) btn.style.display = 'none';
+                
+                // Optional: Show a nicer customized toast instead of alert if available
+                alert("Bonus Claimed! +1000 Credits");
+                location.reload();
+            } else {
+                alert(data);
+                if(btn) btn.disabled = false;
+            }
+        })
+        .catch(e => {
+            console.error(e);
+            if(btn) btn.disabled = false;
+        });
+    }
+
+    @if (ViewBag.NextBonusTime != null)
+    {
+        @:let timeLeft = @(((TimeSpan)ViewBag.NextBonusTime).TotalSeconds);
+        @:const timerEl = document.getElementById('bonus-timer');
+        
+        @:function updateTimer() {
+        @:    if(timeLeft <= 0) {
+        @:        location.reload(); 
+        @:        return;
+        @:    }
+        @:    
+        @:    const h = Math.floor(timeLeft / 3600);
+        @:    const m = Math.floor((timeLeft % 3600) / 60);
+        @:    const s = Math.floor(timeLeft % 60);
+        @:    
+        @:    if (timerEl) {
+        @:        timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        @:    }
+        @:    timeLeft--;
+        @:}
+        @:
+        @:setInterval(updateTimer, 1000);
+        @:updateTimer();
+    }
+</script>
