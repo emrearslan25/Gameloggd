@@ -180,7 +180,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-white text-xl font-bold leading-tight tracking-tight font-display flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">history</span>
-                            Recently Created
+                            Recent Activity
                         </h2>
                         <!-- <a class="text-primary text-xs font-bold uppercase tracking-widest hover:underline" href="#">View All</a> -->
                     </div>
@@ -317,27 +317,39 @@
 
             <!-- Right Column: Sidebar (Sticky) -->
             <div class="w-full lg:w-80 flex flex-col gap-8 flex-shrink-0">
-                <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
-                    <h3 class="text-white text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-sm">badge</span>
-                        Achievements
-                    </h3>
-                    <div class="grid grid-cols-4 gap-2">
-                        <!-- Static placehodlers for now -->
-                        <div class="aspect-square bg-primary/20 border border-primary/50 rounded flex items-center justify-center text-primary" title="Pro Gamer">
-                            <span class="material-symbols-outlined">military_tech</span>
-                        </div>
-                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Reviewer">
-                            <span class="material-symbols-outlined">edit_note</span>
-                        </div>
-                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Speedrunner">
-                            <span class="material-symbols-outlined">bolt</span>
-                        </div>
-                        <div class="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/30" title="Completionist">
-                            <span class="material-symbols-outlined">trophy</span>
+                @if (Model.Lists.Any())
+                {
+                    <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
+                        <h3 class="text-white text-sm font-bold uppercase tracking-widest mb-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-sm">format_list_bulleted</span>
+                                Lists
+                            </div>
+                            <button onclick="switchTab('lists')" class="text-[10px] text-primary hover:underline">View All</button>
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @foreach (var list in Model.Lists.Take(3))
+                            {
+                                <a href="/list/details/@list.Id" class="flex items-center gap-3 group p-2 rounded-lg hover:bg-white/5 transition-all">
+                                    <div class="size-10 bg-black/40 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        @if (list.Items.Any())
+                                        {
+                                            <img src="@(string.IsNullOrEmpty(list.Items.First().Game?.ImagePath) ? "/images/placeholder_game.jpg" : list.Items.First().Game.ImagePath)" class="w-full h-full object-cover">
+                                        }
+                                        else
+                                        {
+                                            <span class="material-symbols-outlined text-white/20 text-xl">folder</span>
+                                        }
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-white text-sm font-bold truncate group-hover:text-primary transition-colors">@list.Title</p>
+                                        <p class="text-white/40 text-[10px] font-bold uppercase tracking-widest">@list.Items.Count Games</p>
+                                    </div>
+                                </a>
+                            }
                         </div>
                     </div>
-                </div>
+                }
 
                 <div class="bg-white/5 border border-white/10 p-6 rounded-xl">
                     <h3 class="text-white text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">

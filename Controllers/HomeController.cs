@@ -468,6 +468,7 @@ public class HomeController : Controller
             PlayedGames = logs.Where(l => l.Status == GameLoggd.Models.Domain.GameStatus.Played).ToList(),
             BacklogGames = logs.Where(l => l.Status == GameLoggd.Models.Domain.GameStatus.Backlog).ToList(),
             WishlistGames = logs.Where(l => l.Status == GameLoggd.Models.Domain.GameStatus.Wishlist).ToList(),
+            Lists = lists,
             // Actually, I can populate `List<ReviewLike>` with included Review.
         };
         
