@@ -128,8 +128,9 @@ public static class DataSeeder
         {
             if (existingGameMap.TryGetValue(game.Slug, out var existingGame))
             {
-                // Update ImagePath if changed
-                if (existingGame.ImagePath != game.ImagePath)
+                // Never overwrite manually uploaded/curated images.
+                // Only backfill a missing ImagePath.
+                if (string.IsNullOrWhiteSpace(existingGame.ImagePath) && !string.IsNullOrWhiteSpace(game.ImagePath))
                 {
                     existingGame.ImagePath = game.ImagePath;
                 }

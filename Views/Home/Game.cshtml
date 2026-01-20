@@ -237,8 +237,25 @@
 </div>
 
 <!-- Review Modal (Using HTML5 <dialog>) -->
-<dialog id="reviewModal" class="bg-transparent p-0 w-full max-w-lg backdrop:bg-black/80 backdrop:backdrop-blur-sm open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in">
-    <div class="bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+<style>
+    #reviewModal {
+        position: fixed;
+        inset: 0;
+        margin: 0;
+        padding: 1rem;
+        border: 0;
+        background: transparent;
+    }
+
+    #reviewModal[open] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<dialog id="reviewModal" class="bg-transparent backdrop:bg-black/80 backdrop:backdrop-blur-sm open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in">
+    <div class="w-full max-w-lg bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
         <div class="p-6 border-b border-white/10 flex items-center justify-between">
             <h3 class="text-xl font-bold text-white uppercase tracking-tight">Rate & Review</h3>
             <form method="dialog">
@@ -272,9 +289,7 @@
             </div>
 
             <div class="flex justify-end gap-4 pt-2">
-                <form method="dialog">
-                    <button class="px-6 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors font-bold text-sm uppercase">Cancel</button>
-                </form>
+                <button type="button" onclick="document.getElementById('reviewModal')?.close()" class="px-6 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors font-bold text-sm uppercase">Cancel</button>
                 <button type="submit" class="px-6 py-2 rounded-lg bg-primary text-black font-bold text-sm uppercase tracking-wide hover:brightness-110">Post Review</button>
             </div>
         </form>

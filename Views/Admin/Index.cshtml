@@ -14,6 +14,8 @@
             <p class="text-white/50 font-medium">System Overview & Management</p>
         </div>
 
+        <div id="admin-dashboard-content">
+
         @if (!string.IsNullOrWhiteSpace(status))
         {
             var statusClass = statusType == "success" ? "text-primary border-primary/20 bg-primary/10" : 
@@ -285,15 +287,15 @@
 
                         <!-- Games Pagination -->
                         <div class="flex items-center justify-between pt-4">
-                             @if (Model.Games.HasPreviousPage) { 
-                                 <a href="/admin?gamePage=@(Model.Games.PageIndex - 1)&userPage=@Model.Users.PageIndex&reviewPage=@Model.Reviews.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">PREV</a>
-                             } else { <span class="px-3 py-1 bg-white/5 rounded opacity-50 text-xs font-bold text-white/50 cursor-not-allowed">PREV</span> }
-                             
-                             <span class="text-xs font-ibm-plex-mono text-white/50">Pg @Model.Games.PageIndex / @Model.Games.TotalPages</span>
-                             
-                             @if (Model.Games.HasNextPage) { 
-                                 <a href="/admin?gamePage=@(Model.Games.PageIndex + 1)&userPage=@Model.Users.PageIndex&reviewPage=@Model.Reviews.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">NEXT</a>
-                             } else { <span class="px-3 py-1 bg-white/5 rounded opacity-50 text-xs font-bold text-white/50 cursor-not-allowed">NEXT</span> }
+                         @if (Model.Games.HasPreviousPage) { 
+                             <a href="/admin?gamePage=@(Model.Games.PageIndex - 1)&userPage=@Model.Users.PageIndex&reviewPage=@Model.Reviews.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">PREV</a>
+                         } else { <span class="px-3 py-1 bg-white/5 rounded opacity-50 text-xs font-bold text-white/50 cursor-not-allowed">PREV</span> }
+                         
+                         <span class="text-xs font-ibm-plex-mono text-white/50">Pg @Model.Games.PageIndex / @Model.Games.TotalPages</span>
+                         
+                         @if (Model.Games.HasNextPage) { 
+                             <a href="/admin?gamePage=@(Model.Games.PageIndex + 1)&userPage=@Model.Users.PageIndex&reviewPage=@Model.Reviews.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">NEXT</a>
+                         } else { <span class="px-3 py-1 bg-white/5 rounded opacity-50 text-xs font-bold text-white/50 cursor-not-allowed">NEXT</span> }
                         </div>
                     </div>
                 </div>
@@ -301,7 +303,7 @@
 
             <!-- Users Management Column -->
             <div class="space-y-6">
-                 <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm sticky top-24">
+                 <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm min-h-[360px]">
                     <div class="flex flex-col gap-1 mb-6 pb-4 border-b border-white/10">
                         <h2 class="text-2xl font-bold text-white font-display flex items-center gap-2">
                             <span class="material-symbols-outlined text-accent-purple">admin_panel_settings</span>
@@ -347,7 +349,7 @@
                     </div>
 
                      <!-- Users Pagination -->
-                    <div class="flex items-center justify-between pt-4 mt-4">
+                    <div class="flex items-center justify-between pt-4 mt-4 shrink-0">
                          @if (Model.Users.HasPreviousPage) { 
                              <a href="/admin?userPage=@(Model.Users.PageIndex - 1)&gamePage=@Model.Games.PageIndex&reviewPage=@Model.Reviews.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">PREV</a>
                          } else { <span class="px-3 py-1 bg-white/5 rounded opacity-50 text-xs font-bold text-white/50 cursor-not-allowed">PREV</span> }
@@ -361,7 +363,7 @@
                 </div>
 
                 <!-- Reviews Management -->
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm">
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm min-h-[360px]">
                     <div class="flex flex-col gap-1 mb-6 pb-4 border-b border-white/10">
                         <h2 class="text-2xl font-bold text-white font-display flex items-center gap-2">
                             <span class="material-symbols-outlined text-red-500">rate_review</span>
@@ -424,7 +426,7 @@
                     </div>
 
                     <!-- Reviews Pagination -->
-                    <div class="flex items-center justify-between pt-4 mt-4">
+                    <div class="flex items-center justify-between pt-4 mt-4 shrink-0">
                         @if (Model.Reviews.HasPreviousPage)
                         {
                             <a href="/admin?reviewPage=@(Model.Reviews.PageIndex - 1)&gamePage=@Model.Games.PageIndex&userPage=@Model.Users.PageIndex&commentPage=@Model.ReviewComments.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">PREV</a>
@@ -448,7 +450,7 @@
                 </div>
 
                 <!-- Review Comment Moderation -->
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm">
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6 md:p-8 backdrop-blur-sm min-h-[360px]">
                     <div class="flex flex-col gap-1 mb-6 pb-4 border-b border-white/10">
                         <h2 class="text-2xl font-bold text-white font-display flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">chat_bubble</span>
@@ -507,7 +509,7 @@
                     </div>
 
                     <!-- Comments Pagination -->
-                    <div class="flex items-center justify-between pt-4 mt-4">
+                    <div class="flex items-center justify-between pt-4 mt-4 shrink-0">
                         @if (Model.ReviewComments.HasPreviousPage)
                         {
                             <a href="/admin?commentPage=@(Model.ReviewComments.PageIndex - 1)&reviewPage=@Model.Reviews.PageIndex&gamePage=@Model.Games.PageIndex&userPage=@Model.Users.PageIndex" class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 text-xs font-bold text-white">PREV</a>
@@ -531,8 +533,104 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 </div>
+
+<script>
+(() => {
+    const containerId = 'admin-dashboard-content';
+
+    function getContainer(docOrEl) {
+        return (docOrEl instanceof Document ? docOrEl : docOrEl.ownerDocument).getElementById(containerId);
+    }
+
+    async function fetchAndSwap(url, { pushState = true, method = 'GET', body = null } = {}) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.classList.add('opacity-70', 'pointer-events-none');
+        try {
+            const resp = await fetch(url, {
+                method,
+                body,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const html = await resp.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const nextContainer = doc.getElementById(containerId);
+            if (!nextContainer) {
+                if (pushState) window.location.href = url;
+                return;
+            }
+
+            container.innerHTML = nextContainer.innerHTML;
+            if (pushState) {
+                history.pushState({}, '', url);
+            }
+        } finally {
+            container.classList.remove('opacity-70', 'pointer-events-none');
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const a = e.target.closest('a');
+        if (!a || !container.contains(a)) return;
+        if (a.target && a.target !== '_self') return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+        let url;
+        try {
+            url = new URL(a.href, window.location.href);
+        } catch {
+            return;
+        }
+
+        if (url.origin !== window.location.origin) return;
+        if (url.pathname !== '/admin') return;
+
+        e.preventDefault();
+        fetchAndSwap(url.toString(), { pushState: true });
+    });
+
+    document.addEventListener('submit', (e) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const form = e.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        if (!container.contains(form)) return;
+
+        let url;
+        try {
+            url = new URL(form.action, window.location.href);
+        } catch {
+            return;
+        }
+
+        if (url.origin !== window.location.origin) return;
+        if (url.pathname !== '/admin' && !url.pathname.startsWith('/admin/')) return;
+
+        e.preventDefault();
+
+        const method = (form.method || 'POST').toUpperCase();
+        const body = new FormData(form);
+        fetchAndSwap(form.action, { pushState: false, method, body });
+    });
+
+    window.addEventListener('popstate', () => {
+        if (window.location.pathname !== '/admin') return;
+        fetchAndSwap(window.location.href, { pushState: false });
+    });
+})();
+</script>
 
 <script>
     function addTag(prefix, inputName) {

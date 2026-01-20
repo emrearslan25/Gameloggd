@@ -545,7 +545,7 @@ public class HomeController : Controller
         var query = _db.Users.AsNoTracking().AsQueryable();
 
         // Reserve "admin" so it never shows in public member lists.
-        query = query.Where(u => u.UserName == null || !u.UserName.Equals("admin", StringComparison.OrdinalIgnoreCase));
+        query = query.Where(u => u.NormalizedUserName == null || u.NormalizedUserName != "ADMIN");
 
         // Filter out users in the Admin role
         var adminRoleId = await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync();

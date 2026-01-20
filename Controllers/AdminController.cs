@@ -23,10 +23,13 @@ public class AdminController : Controller
     [HttpGet("/admin")]
     public async Task<IActionResult> Index([FromQuery] int? gamePage, [FromQuery] int? userPage, [FromQuery] int? reviewPage, [FromQuery] int? commentPage, [FromQuery] Guid? editGameId = null)
     {
-        int pageSize = 10;
+        const int gamesPageSize = 10;
+        const int usersPageSize = 4;
+        const int reviewsPageSize = 2;
+        const int commentsPageSize = 2;
         
         var gamesQuery = _db.Games.AsNoTracking().OrderByDescending(g => g.CreatedAt);
-        var games = await PaginatedList<Game>.CreateAsync(gamesQuery, gamePage ?? 1, pageSize);
+        var games = await PaginatedList<Game>.CreateAsync(gamesQuery, gamePage ?? 1, gamesPageSize);
 
         var usersQuery = _db.Users.AsNoTracking().OrderBy(u => u.UserName).AsQueryable();
 
@@ -38,14 +41,14 @@ public class AdminController : Controller
             usersQuery = usersQuery.Where(u => !adminUserIds.Contains(u.Id));
         }
 
-        var users = await PaginatedList<ApplicationUser>.CreateAsync(usersQuery, userPage ?? 1, pageSize);
+        var users = await PaginatedList<ApplicationUser>.CreateAsync(usersQuery, userPage ?? 1, usersPageSize);
 
         var reviewsQuery = _db.Reviews
             .AsNoTracking()
             .Include(r => r.Game)
             .Include(r => r.User)
             .OrderByDescending(r => r.CreatedAt);
-        var reviews = await PaginatedList<Review>.CreateAsync(reviewsQuery, reviewPage ?? 1, pageSize);
+        var reviews = await PaginatedList<Review>.CreateAsync(reviewsQuery, reviewPage ?? 1, reviewsPageSize);
 
         var commentsQuery = _db.ReviewComments
             .AsNoTracking()
@@ -53,7 +56,7 @@ public class AdminController : Controller
             .Include(c => c.Review)
                 .ThenInclude(r => r.Game)
             .OrderByDescending(c => c.CreatedAt);
-        var comments = await PaginatedList<ReviewComment>.CreateAsync(commentsQuery, commentPage ?? 1, pageSize);
+        var comments = await PaginatedList<ReviewComment>.CreateAsync(commentsQuery, commentPage ?? 1, commentsPageSize);
 
         Game? editing = null;
         if (editGameId is not null)
