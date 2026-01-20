@@ -449,6 +449,13 @@ public class HomeController : Controller
             .OrderByDescending(l => l.CreatedAt)
             .ToListAsync();
 
+        var favorites = await _db.UserFavoriteGames
+            .AsNoTracking()
+            .Where(f => f.UserId == user.Id)
+            .Include(f => f.Game)
+            .OrderBy(f => f.Slot)
+            .ToListAsync();
+
 
         var viewModel = new GameLoggd.Models.ViewModels.UserProfileViewModel
         {
@@ -474,6 +481,8 @@ public class HomeController : Controller
                 .ThenInclude(r => r.User)
             .OrderByDescending(l => l.LikedAt)
             .ToListAsync();
+
+        viewModel.Favorites = favorites;
 
         return View("Profile", viewModel);
     }

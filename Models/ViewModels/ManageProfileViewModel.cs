@@ -38,4 +38,10 @@ public class ManageProfileViewModel
     [DataType(DataType.Upload)]
     [Display(Name = "Cover Photo")]
     public IFormFile? CoverPhoto { get; set; }
+
+    // Up to 5 favorite games (by Game.Id)
+    public Guid?[] FavoriteGameIds { get; set; } = new Guid?[5];
+
+    // UI-only: typed/selected titles for the 5 slots
+    public string?[] FavoriteGameTitles { get; set; } = new string?[5];
 }

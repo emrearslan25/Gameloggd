@@ -1,5 +1,7 @@
 using GameLoggd.Models.Auth;
 using GameLoggd.Models;
+using GameLoggd.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using GameLoggd.Models.ViewModels;
@@ -12,11 +14,13 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ApplicationDbContext _db;
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ApplicationDbContext db)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _db = db;
     }
 
     [HttpGet("/account")]
@@ -167,6 +171,46 @@ public class AccountController : Controller
             return Redirect("/admin");
         }
 
+        var favorites = await _db.UserFavoriteGames
+            .AsNoTracking()
+            .Where(f => f.UserId == user.Id)
+            .OrderBy(f => f.Slot)
+            .ToListAsync();
+
+        var favoriteIds = new Guid?[5];
+        foreach (var fav in favorites)
+        {
+            if (fav.Slot is >= 1 and <= 5)
+            {
+                favoriteIds[fav.Slot - 1] = fav.GameId;
+            }
+        }
+
+        var favoriteTitles = new string?[5];
+        var distinctIds = favoriteIds
+            .Where(x => x.HasValue)
+            .Select(x => x!.Value)
+            .Distinct()
+            .ToList();
+
+        if (distinctIds.Count > 0)
+        {
+            var titleMap = await _db.Games
+                .AsNoTracking()
+                .Where(g => distinctIds.Contains(g.Id))
+                .Select(g => new { g.Id, g.Title })
+                .ToDictionaryAsync(x => x.Id, x => x.Title);
+
+            for (var i = 0; i < 5; i++)
+            {
+                var id = favoriteIds[i];
+                if (id.HasValue && titleMap.TryGetValue(id.Value, out var title))
+                {
+                    favoriteTitles[i] = title;
+                }
+            }
+        }
+
         var model = new ManageProfileViewModel
         {
             Username = user.UserName,
@@ -174,7 +218,9 @@ public class AccountController : Controller
             Bio = user.Bio,
             ProfilePicturePath = user.ProfilePicturePath,
             CoverPhotoPath = user.CoverPhotoPath,
-            StatusMessage = TempData["StatusMessage"] as string
+            StatusMessage = TempData["StatusMessage"] as string,
+            FavoriteGameIds = favoriteIds,
+            FavoriteGameTitles = favoriteTitles
         };
 
         return View(model);
@@ -190,6 +236,32 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
+            // Rehydrate titles for any selected IDs so the UI stays stable on validation errors.
+            var incomingIdsForUi = model.FavoriteGameIds ?? Array.Empty<Guid?>();
+            var distinctIds = incomingIdsForUi
+                .Where(x => x.HasValue)
+                .Select(x => x!.Value)
+                .Distinct()
+                .ToList();
+
+            if (distinctIds.Count > 0)
+            {
+                var titleMap = await _db.Games
+                    .AsNoTracking()
+                    .Where(g => distinctIds.Contains(g.Id))
+                    .Select(g => new { g.Id, g.Title })
+                    .ToDictionaryAsync(x => x.Id, x => x.Title);
+
+                model.FavoriteGameTitles ??= new string?[5];
+                for (var i = 0; i < Math.Min(5, incomingIdsForUi.Length); i++)
+                {
+                    var id = incomingIdsForUi[i];
+                    if (id.HasValue && titleMap.TryGetValue(id.Value, out var title))
+                    {
+                        model.FavoriteGameTitles[i] = title;
+                    }
+                }
+            }
             return View("Manage", model);
         }
 
@@ -290,8 +362,76 @@ public class AccountController : Controller
              }
         }
 
+        // Update Favorites (up to 5 slots)
+        var incoming = model.FavoriteGameIds ?? Array.Empty<Guid?>();
+        var normalizedSlots = new List<(int Slot, Guid GameId)>();
+        var seen = new HashSet<Guid>();
+        for (var i = 0; i < 5; i++)
+        {
+            if (i >= incoming.Length) break;
+            var gameId = incoming[i];
+            if (gameId is null) continue;
+            if (!seen.Add(gameId.Value)) continue;
+            normalizedSlots.Add((i + 1, gameId.Value));
+        }
+
+        if (normalizedSlots.Count > 0)
+        {
+            var validIds = await _db.Games
+                .AsNoTracking()
+                .Where(g => normalizedSlots.Select(x => x.GameId).Contains(g.Id))
+                .Select(g => g.Id)
+                .ToListAsync();
+
+            normalizedSlots = normalizedSlots
+                .Where(x => validIds.Contains(x.GameId))
+                .ToList();
+        }
+
+        var existingFavorites = await _db.UserFavoriteGames.Where(f => f.UserId == user.Id).ToListAsync();
+        if (existingFavorites.Count > 0)
+        {
+            _db.UserFavoriteGames.RemoveRange(existingFavorites);
+        }
+
+        foreach (var (slot, gameId) in normalizedSlots)
+        {
+            _db.UserFavoriteGames.Add(new GameLoggd.Models.Domain.UserFavoriteGame
+            {
+                UserId = user.Id,
+                GameId = gameId,
+                Slot = slot,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _db.SaveChangesAsync();
+
         TempData["StatusMessage"] = "Your profile has been updated";
         return RedirectToAction("Manage");
+    }
+
+    [HttpGet("/account/game-search")]
+    [Authorize]
+    public async Task<IActionResult> GameSearch([FromQuery] string? q)
+    {
+        var query = (q ?? string.Empty).Trim();
+        if (query.Length < 2)
+        {
+            return Json(Array.Empty<object>());
+        }
+
+        var lower = query.ToLowerInvariant();
+
+        var results = await _db.Games
+            .AsNoTracking()
+            .Where(g => g.Title != null && EF.Functions.Like(g.Title.ToLower(), $"%{lower}%"))
+            .OrderBy(g => g.Title)
+            .Take(10)
+            .Select(g => new { id = g.Id, title = g.Title })
+            .ToListAsync();
+
+        return Json(results);
     }
 
     [HttpPost("/account/manage/password")]

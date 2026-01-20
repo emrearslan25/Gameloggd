@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ReviewComment> ReviewComments => Set<ReviewComment>();
     public DbSet<UserListLike> UserListLikes => Set<UserListLike>();
     public DbSet<Message> Messages => Set<Message>();
+    public DbSet<UserFavoriteGame> UserFavoriteGames => Set<UserFavoriteGame>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -129,6 +130,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(x => x.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<UserFavoriteGame>(b =>
+        {
+            b.HasKey(x => new { x.UserId, x.Slot });
+
+            b.Property(x => x.Slot).IsRequired();
+            b.Property(x => x.CreatedAt).IsRequired();
+
+            b.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(x => x.Game)
+                .WithMany()
+                .HasForeignKey(x => x.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasIndex(x => new { x.UserId, x.GameId }).IsUnique();
         });
     }
 }

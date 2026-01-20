@@ -16,4 +16,6 @@ public class UserProfileViewModel
     public List<GameLoggd.Models.Domain.UserGameLog> WishlistGames { get; set; } = new();
     public List<GameLoggd.Models.Domain.ReviewLike> LikedReviews { get; set; } = new();
     public List<GameLoggd.Models.Domain.UserList> Lists { get; set; } = new();
+
+    public List<GameLoggd.Models.Domain.UserFavoriteGame> Favorites { get; set; } = new();
 }

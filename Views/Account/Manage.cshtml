@@ -100,6 +100,44 @@
                         <span asp-validation-for="Bio" class="text-red-500 text-xs font-bold mt-1 block"></span>
                     </div>
 
+                    <!-- Favorites (5 Slots) -->
+                    <div class="pt-2 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white font-display flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">star</span>
+                                Favorites (5 Slots)
+                            </h3>
+                            <p class="text-white/40 text-xs font-bold uppercase tracking-widest">Optional</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            @for (var i = 0; i < 5; i++)
+                            {
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-bold uppercase tracking-widest text-white/50">Favorite #@(i + 1)</label>
+                                    <div class="relative" data-game-search-url="/account/game-search">
+                                        <input type="hidden" name="FavoriteGameIds[@i]" id="fav-id-@i" value="@(Model.FavoriteGameIds != null && Model.FavoriteGameIds.Length > i ? (Model.FavoriteGameIds[i]?.ToString() ?? string.Empty) : string.Empty)" />
+                                        <input
+                                            type="text"
+                                            name="FavoriteGameTitles[@i]"
+                                            id="fav-title-@i"
+                                            value="@(Model.FavoriteGameTitles != null && Model.FavoriteGameTitles.Length > i ? (Model.FavoriteGameTitles[i] ?? string.Empty) : string.Empty)"
+                                            placeholder="Type a game name..."
+                                            autocomplete="off"
+                                            spellcheck="false"
+                                            data-fav-slot="@i"
+                                            class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:bg-white/5 hover:border-white/30 transition-all font-medium"
+                                        />
+
+                                        <div id="fav-results-@i" class="hidden absolute z-50 mt-2 w-full rounded-lg border border-white/10 bg-black/90 backdrop-blur-sm shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <p class="text-white/40 text-xs">Pick up to 5 games. Duplicates are ignored.</p>
+                    </div>
+
                     <div class="flex justify-end pt-4">
                         <button type="submit" class="bg-primary text-background-dark font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-white hover:text-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(13,242,51,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
                             Save Changes
@@ -148,3 +186,134 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const debounce = (fn, delayMs) => {
+                let t;
+                return (...args) => {
+                    window.clearTimeout(t);
+                    t = window.setTimeout(() => fn(...args), delayMs);
+                };
+            };
+
+            const closeAll = () => {
+                document.querySelectorAll('[id^="fav-results-"]').forEach(el => {
+                    el.classList.add('hidden');
+                    el.innerHTML = '';
+                });
+            };
+
+            document.addEventListener('click', (e) => {
+                const within = e.target.closest('[data-game-search-url]');
+                if (!within) closeAll();
+            });
+
+            const setupSlot = (slotIndex) => {
+                const titleInput = document.getElementById(`fav-title-${slotIndex}`);
+                const idInput = document.getElementById(`fav-id-${slotIndex}`);
+                const resultsEl = document.getElementById(`fav-results-${slotIndex}`);
+                if (!titleInput || !idInput || !resultsEl) return;
+
+                const container = titleInput.closest('[data-game-search-url]');
+                const searchUrl = container?.getAttribute('data-game-search-url') || '/account/game-search';
+
+                let selectedId = idInput.value || '';
+                let selectedTitle = titleInput.value || '';
+
+                const render = (items) => {
+                    resultsEl.innerHTML = '';
+                    if (!items || items.length === 0) {
+                        resultsEl.classList.add('hidden');
+                        return;
+                    }
+
+                    for (const item of items) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'w-full text-left px-4 py-2 text-white/90 hover:bg-white/10 transition-colors';
+                        btn.textContent = item.title;
+
+                        btn.addEventListener('mousedown', (ev) => {
+                            // mousedown so it wins over input blur
+                            ev.preventDefault();
+                            titleInput.value = item.title;
+                            idInput.value = item.id;
+                            selectedTitle = item.title;
+                            selectedId = item.id;
+                            resultsEl.classList.add('hidden');
+                            resultsEl.innerHTML = '';
+                        });
+
+                        resultsEl.appendChild(btn);
+                    }
+
+                    resultsEl.classList.remove('hidden');
+                };
+
+                const doSearch = debounce(async () => {
+                    const q = (titleInput.value || '').trim();
+
+                    if (!q) {
+                        idInput.value = '';
+                        selectedId = '';
+                        selectedTitle = '';
+                        render([]);
+                        return;
+                    }
+
+                    if (q.length < 2) {
+                        render([]);
+                        return;
+                    }
+
+                    const url = `${searchUrl}?q=${encodeURIComponent(q)}`;
+                    try {
+                        const res = await fetch(url, {
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!res.ok) {
+                            render([]);
+                            return;
+                        }
+
+                        const data = await res.json();
+                        render(Array.isArray(data) ? data : []);
+                    } catch {
+                        render([]);
+                    }
+                }, 150);
+
+                titleInput.addEventListener('input', () => {
+                    const current = (titleInput.value || '').trim();
+                    if (current !== selectedTitle) {
+                        idInput.value = '';
+                        selectedId = '';
+                    } else {
+                        idInput.value = selectedId;
+                    }
+                    doSearch();
+                });
+
+                titleInput.addEventListener('focus', () => {
+                    // If already has 2+ chars, show suggestions again
+                    if ((titleInput.value || '').trim().length >= 2) doSearch();
+                });
+
+                titleInput.addEventListener('blur', () => {
+                    // Let click selection finish, then close
+                    window.setTimeout(() => {
+                        resultsEl.classList.add('hidden');
+                        resultsEl.innerHTML = '';
+                    }, 120);
+                });
+            };
+
+            for (let i = 0; i < 5; i++) setupSlot(i);
+        })();
+    </script>
+}
