@@ -1,46 +1,26 @@
 # GameLoggd
 
-GameLoggd; oynadığın oyunları **takip edebileceğin**, oyunlar hakkında **puan verip yorum yazabileceğin**, kendi **oyun listelerini** oluşturabileceğin ve diğer oyuncularla **etkileşime** geçebileceğin bir topluluk uygulamasıdır.
+## Proje Amacı
+GameLoggd, video oyun tutkunlarının oynadıkları oyunları kayıt altında tutabileceği, kişisel oyun kitaplıklarını oluşturabileceği ve oyun dünyasına dair düşüncelerini diğer oyuncularla paylaşabileceği kapsamlı bir **sosyal oyun günlüğü** platformudur. Projenin temel amacı, dağınık haldeki oyun deneyimlerini tek bir merkezde toplamak ve oyuncular arasında bir referans ağı oluşturmaktır.
 
-Kısaca: “Ne oynadım, ne düşünüyorum, kimlerle aynı zevklere sahibim?” sorularının hepsini tek yerde toplar.
+## Hedef Kullanıcı Kitlesi
+- Oyun geçmişini düzenli bir şekilde arşivlemek isteyen koleksiyoner oyuncular.
+- Yeni oyunlar keşfetmek için topluluk yorumlarına ve güvenilir incelemelere ihtiyaç duyanlar.
+- Kendi oyun zevkini "Favori 5'li" veya özel listelerle (örn: "Yılın En İyi RPG'leri") sergilemek isteyen sosyal oyuncular.
+- Oyun dünyasındaki diğer kullanıcılarla etkileşime girip, takip sistemi ve mesajlaşma ile iletişim kurmak isteyen herkes.
 
-## Bu projede neler yapabilirsin?
+## Senaryo / Kullanım Amacı
+Bir kullanıcı sisteme giriş yaptığında;
+1. **Keşif:** Geniş oyun kataloğunda arama yapabilir, oyunların detaylı bilgilerini, türlerini ve platformlarını inceleyebilir.
+2. **Kayıt:** Oynadığı, bitirdiği veya oynamayı planladığı (backlog) oyunları durumlarına göre işaretleyerek dijital günlüğüne ekler.
+3. **Değerlendirme:** Bitirdiği bir oyuna 1-5 arası puan verir ve detaylı bir inceleme yazarak diğer oyunculara yol gösterir.
+4. **Kişiselleştirme:** Profilini favori oyunları, kapak fotoğrafı ve bio ile özelleştirir; kendine özel oyun listeleri oluşturur.
+5. **Etkileşim:** Diğer üyeleri takip eder, yorumlarını beğenir, anlık sohbet panelinden mesajlaşır ve casino mini oyunlarıyla (kredi sistemi) eğlenceli vakit geçirir.
 
-- **Oyun keşfet:** Oyunlar sayfasında oyunlara göz atabilir, arama yapabilir, tür/platform gibi filtrelerle istediğini hızlıca bulabilirsin.
-- **Oyun sayfasında aksiyona geç:** Bir oyunun sayfasında o oyun hakkında bilgileri görür, topluluk yorumlarını okursun.
-- **Oyun günlüğü tut:** “Şu an oynuyorum”, “Bitirdim”, “Backlog’a aldım” gibi durumlarla oyunlarını işaretleyebilirsin.
-- **Puan ver & yorum yaz:** Oyunlara puan verip düşüncelerini yazabilir, diğer kullanıcıların yorumlarını beğenebilir ve yorumlara cevap bırakabilirsin.
-
-## Profil ve sosyal özellikler
-
-- **Kişisel profil:** Profil fotoğrafı, kapak fotoğrafı ve kısa bio ile profilini özelleştirebilirsin.
-- **Favoriler (5 slot):** Profilinde öne çıkarmak istediğin 5 oyunu “Favoriler” kısmına sabitleyebilirsin.
-- **Takip sistemi:** Kullanıcıları takip edip, profillerini inceleyebilirsin.
-- **Mesajlaşma:** Sağ alttaki mesaj panelinden arkadaşlarınla mesajlaşabilirsin.
-
-## Listeler
-
-- **Kendi listelerini oluştur:** “En sevdiğim RPG’ler”, “Co-op önerileri”, “Bu yıl bitireceklerim” gibi listeler yapabilirsin.
-- **Listeye oyun ekle:** Listeye oyun arayarak ekleyebilir, listeni paylaşılabilir bir koleksiyona dönüştürebilirsin.
-
-## Casino (eğlencelik)
-
-Profilindeki kredileri kullanarak küçük mini-oyunlar oynayabileceğin bir casino alanı da var.
-
-## Sayfalar (kullanıcı gözüyle)
-
-- **Ana Sayfa:** Toplulukta neler oluyor? Yeni yorumlar, loglar ve liste aktiviteleri.
-- **Games / Oyunlar:** Oyun kataloğu; arama + filtreleme.
-- **Game Detay:** Oyunu incele, logla, puanla, yorumları oku.
-- **Members / Üyeler:** Diğer oyuncuları keşfet, takip et.
-- **Profil:** İstatistikler, favoriler, oyun geçmişi, yorumlar.
-- **Lists / Listeler:** Kendi listelerin ve liste detayları.
-- **Casino:** Günlük bonus ve mini-oyunlar.
-
-## Yönetim paneli (Admin)
-
-Bu projede ayrıca yöneticiler için bir kontrol paneli bulunur. Buradan:
-
-- Oyunları yönetebilir (ekle/güncelle/sil)
-- Kullanıcıları banlayıp kaldırabilir
-- Yorum ve yorum yorumlarını moderasyon amaçlı yönetebilirsin.
+## Kullanılan Teknolojiler
+- **C#**
+- **ASP.NET MVC / ASP.NET Core MVC**
+- **SQL Server Express**
+- **Entity Framework Core**
+- **Identity Architecture**
+- **Tailwind CSS**
