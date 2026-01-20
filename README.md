@@ -24,3 +24,6 @@ Bir kullanıcı sisteme giriş yaptığında;
 - **Entity Framework Core**
 - **Identity Architecture**
 - **Tailwind CSS**
+
+
+https://www.youtube.com/watch?v=eorPQN3xYhY
